@@ -1,0 +1,8 @@
+; $Id$
+name = Migrate Userpoints
+description = "Allows migrate to import userpoints"
+core = 6.x
+package="Development"
+
+dependencies[] = userpoints
+dependencies[] = migrate

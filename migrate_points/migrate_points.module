@@ -1,0 +1,7 @@
+<?php
+// $Id$
+
+//only include the user_realtionships code if the module is enabled
+if(module_exists('userpoints')) {
+  include_once(drupal_get_path('module', 'migrate_points') .'/userpoints.inc');
+}
