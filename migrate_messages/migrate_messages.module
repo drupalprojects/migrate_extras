@@ -1,0 +1,20 @@
+<?php
+// $Id$
+
+//@todo: replace with hook_migrate_api() below.
+//only include the user_realtionships code if the module is enabled
+if(module_exists('privatemsg')) {
+  include_once(drupal_get_path('module', 'migrate_messages') .'/privatemsg.migrate.inc');
+}
+
+
+/* @todo: this is setup, waiting for hook_migrate_api() to be approved.
+function migrate_messages_migrate_api() {
+	return array(
+	  'api' => 1,
+	  'integration modules' => array(
+	    'privatemsg',
+	  ),
+	);
+}
+*/
