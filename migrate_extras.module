@@ -6,62 +6,62 @@
  */
 function migrate_extras_migrate_fields_user($type) {
   $fields = array();
-  
+
   //set md5 passwords without reencrypting them.
   if (variable_get('migrate_extras_use_md5', 0)) {
     $fields['md5pass'] = t('User: Password(md5)');
   }
-  
+
     //set md5 passwords without reencrypting them.
   if (variable_get('migrate_extras_set_uid', 0)) {
     $fields['uid'] = t('User: Set UID (dangerous)');
   }
-  
+
   //set md5 passwords without reencrypting them.
   if (variable_get('migrate_extras_user_fields_all', 0)) {
-    
+
     $fields['mode'] = t('User: Mode');
     //Per-user comment display mode (threaded vs. flat), used by the {comment} module.
-    
+
     $fields['sort'] = t('User: Sort');
     // Per-user comment sort order (newest vs. oldest first), used by the {comment} module.
-    
+
     $fields['threshold'] = t('User: Threshold (unused)');
     // Previously used by the {comment} module for per-user preferences; no longer used.
-    
+
     $fields['theme'] = t('User: Theme');
     // User's default theme.
-    
+
     $fields['signature'] = t('User: Signature');
     // User's signature.
-    
+
     $fields['signature_format'] = t('User: Signature Format');
     // The {filter_formats}.format of the signature.
-    
+
     $fields['status'] = t('User: Status');
     // Whether the user is active(1) or blocked(0).
-    
+
     $fields['timezone'] = t('User: Timezone');
     // User's timezone.
-    
+
     $fields['language'] = t('User: Language');
     // User's default language.
-    
+
     $fields['picture'] = t('User: Picture');
     // Path to the user's uploaded picture.
-    
+
     $fields['init'] = t('User: (Init)ial Email');
     //Email address used for initial account creation.
 
     $fields['data'] = t('User: Data (depricated)');
     /* A serialized array of name value pairs that are related to the user.
-     * Any form values posted during user edit are stored and are loaded 
-     * into the $user object during user_load(). Use of this field is 
-     * discouraged and it will likely disappear in a future version of 
+     * Any form values posted during user edit are stored and are loaded
+     * into the $user object during user_load(). Use of this field is
+     * discouraged and it will likely disappear in a future version of
      * Drupal.'
      */
   }
-  
+
 
   return $fields;
 }
@@ -71,11 +71,11 @@ function migrate_extras_migrate_fields_user($type) {
  */
 function migrate_extras_migrate_prepare_user(&$newuser, $tblinfo, $row) {
   //note new user is an array, not object
-   
+
   //get the primary key (uid)
   $srckey = $tblinfo->sourcekey;
   $uid = $row->$srckey;
-  
+
   // Remove md5pass from the user object
   if (isset($newuser['md5pass'])) {
    //don't want to let this remain in the $user object or it will be stored in $user->data
@@ -91,20 +91,20 @@ function migrate_extras_migrate_complete_user(&$account, $tblinfo, $row) {
 
   //restore the original md5password
   if ($account->uid) {
-    
+
     //MD5 password fix
     $md5_src = $tblinfo->fields['md5pass']['srcfield'];
-    $md5pass = $row->$md5_src; 
-    
+    $md5pass = $row->$md5_src;
+
     $ret = db_query("UPDATE {users} SET pass = '%s' WHERE uid = %d", $md5pass, $account->uid);
-    
+
     $check_user = user_load($account->uid);
-    
+
     if($check_user->pass != $md5pass) {
       $errors[] = migrate_message_set(t("md5 encoded passwords don't match"));
-    }    
+    }
   }
-  return $errors; 
+  return $errors;
 }
 
 /*
@@ -112,19 +112,19 @@ function migrate_extras_migrate_complete_user(&$account, $tblinfo, $row) {
  */
 function migrate_extras_settings() {
   $form = array();
-  
+
   $form['users'] = array(
     '#type' => 'fieldset',
     '#title' => t('Users'),
     '#tree' => TRUE,
   );
-    
-    
+
+
   $form['users']['migrate_extras_use_md5'] = array(
     '#type' => 'checkbox',
     '#title' => t('MD5 password field'),
     '#default_value' => variable_get('migrate_extras_use_md5', 0),
-    '#description' => t("Enable an md5 password field for users, use 
+    '#description' => t("Enable an md5 password field for users, use
       this if you are migrating passwords that are already encrypted."),
   );
 
@@ -132,19 +132,19 @@ function migrate_extras_settings() {
     '#type' => 'checkbox',
     '#title' => t("Use all user fields"),
     '#default_value' => variable_get('migrate_extras_user_fields_all', 0),
-    '#description' => t('Enable all the core drupal user fields 
+    '#description' => t('Enable all the core drupal user fields
       available, for advanced imports. None of these fields are required
-      to import users. Some fields may only take data in specialized 
+      to import users. Some fields may only take data in specialized
       format. See <a href="http://api.drupal.org/api/function/user_schema">
       http://api.drupal.org/api/function/user_schema</a> for more info.'),
   );
-  
+
   $form['users']['migrate_extras_set_uid'] = array(
     '#type' => 'checkbox',
     '#title' => t("Set User ID explicitly (dangerous)"),
     '#default_value' => variable_get('migrate_extras_set_uid', 0),
     '#description' => t("This will set the user id of the imported user,
-       which means that you may overwrite your existing users, including 
+       which means that you may overwrite your existing users, including
        user 1. Use with extreme caution."),
   );
 
@@ -170,4 +170,19 @@ function migrate_extras_menu() {
 
   return $items;
 }
- ?>
+
+/*
+ * Implementation of hook_migrate_api().
+ */
+function migrate_extras_migrate_api() {
+  $api = array(
+    'api' => 1,
+    'integration modules' => array(
+      'content',
+      'content_profile',
+      'email_registration',
+      'filefield',
+    ),
+  );
+  return $api;
+}
