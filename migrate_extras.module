@@ -175,13 +175,16 @@ function migrate_extras_menu() {
  * Implementation of hook_migrate_api().
  */
 function migrate_extras_migrate_api() {
+  // Note we enable content (CCK) by default, since almost everyone will need
+  // it, but disable the others to avoid function redeclaration errors if/when
+  // those modules support migrate directly.
   $api = array(
     'api' => 1,
     'integration modules' => array(
       'content',
-      'content_profile',
-      'email_registration',
-      'filefield',
+      'content_profile' => array('status' => FALSE),
+      'email_registration' => array('status' => FALSE),
+      'filefield' => array('status' => FALSE),
     ),
   );
   return $api;
