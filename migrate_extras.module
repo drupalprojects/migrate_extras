@@ -39,7 +39,7 @@ function migrate_extras_settings() {
     '#description' => t("Enable an md5 password field for users, use 
       this if you are migrating passwords that are already encrypted."),
   );
-  * 
+   
   $form['users']['migrate_extras_user_fields_all'] = array(
     '#type' => 'checkbox',
     '#title' => t("Use all user fields"),
@@ -191,15 +191,22 @@ function migrate_extras_migrate_prepare_user(&$newuser, $tblinfo, $row) {
  * Implementation of hook_migrate_destination_fields_user().
  */
 function migrate_extras_migrate_complete_user(&$account, $tblinfo, $row) {
- $errors = array();
-
+  $errors = array();
+  $md5pass = FALSE;
+  if (isset($tblinfo->fields['md5pass']['srcfield'])) {
+    $md5_src = $tblinfo->fields['md5pass']['srcfield'];
+    if(isset($row->$md5_src) {
+      $md5pass = $row->$md5_src;
+    else {
+      $errors[] = migrate_message('No MD5 password provided for this user.');
+      return $errors;
+    }
+  }
+  
   //restore the original md5password
-  if ($account->uid) {
+  if ($account->uid && $md5pass !== FALSE && variable_get('migrate_extras_use_md5', 0)) {
 
     //MD5 password fix
-    $md5_src = $tblinfo->fields['md5pass']['srcfield'];
-    $md5pass = $row->$md5_src;
-
     $ret = db_query("UPDATE {users} SET pass = '%s' WHERE uid = %d", $md5pass, $account->uid);
 
     $check_user = user_load($account->uid);
