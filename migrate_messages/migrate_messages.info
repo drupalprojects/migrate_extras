@@ -1,8 +1,0 @@
-; $Id$
-name = Migrate Private Messages 
-description = "Allows migrate to import privatemsg messages"
-core = 6.x
-package="Custom"
-
-dependencies[] = privatemsg
-

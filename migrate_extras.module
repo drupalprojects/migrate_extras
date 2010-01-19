@@ -15,6 +15,7 @@ function migrate_extras_migrate_api() {
       'email_registration' => array('status' => FALSE),
       'filefield' => array('status' => FALSE),
       'location' => array('status' => FALSE),
+      'privatemsg' => array('status' => FALSE),
     ),
   );
   return $api;

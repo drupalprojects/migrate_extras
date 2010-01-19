@@ -10,7 +10,7 @@
 /**
  * Implementation of hook_migrate_types().
  */
-function migrate_messages_migrate_types() {
+function privatemsg_migrate_types() {
   $types = array('privatemsg' => t('Private Message'));
   return $types;
 }
@@ -18,7 +18,7 @@ function migrate_messages_migrate_types() {
 /**
  * Implementation of hook_migrate_fields().
  */
-function migrate_messages_migrate_fields_privatemsg($type) { 
+function privatemsg_migrate_fields_privatemsg($type) { 
  
   $fields = array(
       // 'mid' => t('Message ID'), //this is to be set on the fly, don't need
@@ -39,7 +39,7 @@ function migrate_messages_migrate_fields_privatemsg($type) {
 /**
  * Implementation of hook_migrate_prepare().
  */
-function migrate_messages_migrate_prepare_privatemsg(&$msg, $tblinfo, $row) {
+function privatemsg_migrate_prepare_privatemsg(&$msg, $tblinfo, $row) {
   //we can't just pass the $msg object into privatemsg_new_thread() as is, so lets fix it up.
   
   //get full user objects for author and recipients, seems like a lot of overhead?
@@ -62,7 +62,7 @@ function migrate_messages_migrate_prepare_privatemsg(&$msg, $tblinfo, $row) {
 /**
  * Implementation of hook_migrate_import().
  */
-function migrate_messages_migrate_import_privatemsg($tblinfo, $row) {
+function privatemsg_migrate_import_privatemsg($tblinfo, $row) {
   $msg = (object)array();
   foreach ($tblinfo->fields as $destfield => $values) {
 
@@ -107,7 +107,7 @@ function migrate_messages_migrate_import_privatemsg($tblinfo, $row) {
 /**
  * Implementation of hook_migrate_complete().
  */
-function migrate_messages_migrate_complete_privatemsg($msg, $tblinfo, $row) {
+function privatemsg_migrate_complete_privatemsg($msg, $tblinfo, $row) {
   $errors = array();
   if ($msg->message['mid']) {
    
@@ -135,7 +135,7 @@ function migrate_messages_migrate_complete_privatemsg($msg, $tblinfo, $row) {
 /**
  * Implementation of hook_migrate_delete().
  */
-function migrate_messages_migrate_delete_privatemsg($mid) {
+function privatemsg_migrate_delete_privatemsg($mid) {
   //privatemsg_thread_change_delete($mid, 1, $)
   db_query("DELETE FROM {pm_index} WHERE mid = %d", $mid);
   db_query("DELETE FROM {pm_message} WHERE mid = %d", $mid);
