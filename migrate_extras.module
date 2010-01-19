@@ -196,8 +196,9 @@ function migrate_extras_migrate_complete_user(&$account, $tblinfo, $row) {
   $md5pass = FALSE;
   if (isset($tblinfo->fields['md5pass']['srcfield'])) {
     $md5_src = $tblinfo->fields['md5pass']['srcfield'];
-    if(isset($row->$md5_src) {
+    if(isset($row->$md5_src)) {
       $md5pass = $row->$md5_src;
+    }
     else {
       $errors[] = migrate_message('No MD5 password provided for this user.');
       return $errors;
