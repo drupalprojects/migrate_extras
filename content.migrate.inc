@@ -163,6 +163,7 @@ function content_migrate_prepare_node(&$node, $tblinfo, $row) {
           else {
             $node->$field_name = array($delta => array($column => $value));
           }
+          dpm($node);
         }
       }
 
