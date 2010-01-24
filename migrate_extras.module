@@ -26,28 +26,28 @@ function migrate_extras_migrate_api() {
  */
 function migrate_extras_settings() {
   $form = array();
-  
+
   $form['users'] = array(
     '#type' => 'fieldset',
     '#title' => t('Users'),
   );
-  
-  //this should be moved to migrate_module  
+
+  //this should be moved to migrate_module
   $form['users']['migrate_extras_use_md5'] = array(
     '#type' => 'checkbox',
     '#title' => t('MD5 password field'),
     '#default_value' => variable_get('migrate_extras_use_md5', 0),
-    '#description' => t("Enable an md5 password field for users, use 
+    '#description' => t("Enable an md5 password field for users, use
       this if you are migrating passwords that are already encrypted."),
   );
-   
+
   $form['users']['migrate_extras_user_fields_all'] = array(
     '#type' => 'checkbox',
     '#title' => t("Use all user fields"),
     '#default_value' => variable_get('migrate_extras_user_fields_all', 0),
-    '#description' => t('Enable all the core drupal user fields 
+    '#description' => t('Enable all the core drupal user fields
       available, for advanced imports. None of these fields are required
-      to import users. Some fields may only take data in specialized 
+      to import users. Some fields may only take data in specialized
       format. See <a href="http://api.drupal.org/api/function/user_schema">
       http://api.drupal.org/api/function/user_schema</a> for more info.'),
   );
@@ -57,15 +57,15 @@ function migrate_extras_settings() {
     '#title' => t("Set User ID explicitly (dangerous)"),
     '#default_value' => variable_get('migrate_extras_set_uid', 0),
     '#description' => t("This will set the user id of the imported user,
-       which means that you may overwrite your existing users, including 
+       which means that you may overwrite your existing users, including
        user 1. Use with extreme caution."),
   );
-*/  
+*/
   $form['node'] = array(
     '#type' => 'fieldset',
     '#title' => t('Nodes'),
   );
-  
+
   $form['node']['migrate_extras_use_master_node_map'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use the migrate extras master node map.'),
@@ -75,7 +75,7 @@ function migrate_extras_settings() {
       table. This is good if you are using multiple content sets to import nodes and
       want the convenience of using just one map table as the basis for
       following imports like comments. Only use this if source ids across
-      content sets are unique."
+      content sets are unique and are all of integer type."
     ),
   );
 
@@ -204,7 +204,7 @@ function migrate_extras_migrate_complete_user(&$account, $tblinfo, $row) {
       return $errors;
     }
   }
-  
+
   //restore the original md5password
   if ($account->uid && $md5pass !== FALSE && variable_get('migrate_extras_use_md5', 0)) {
 
@@ -234,7 +234,7 @@ function migrate_extras_migrate_complete_node($node, $tblinfo, $row) {
   if (variable_get('migrate_extras_use_master_node_map', 0) && $node->nid) {
     $sourcekey = $tblinfo->sourcekey;
     static $maptables = array();
-    
+
     if (!isset($maptables[$mcsid])) {
       $maptables[$mcsid] = migrate_map_table_name($tblinfo->mcsid);
     }
@@ -243,9 +243,9 @@ function migrate_extras_migrate_complete_node($node, $tblinfo, $row) {
                                         FROM {' . $maptables[$tblinfo->mcsid] . "}
                                         WHERE sourceid='%s'",
                                        $row->$sourcekey));
-    
+
     if ($needs_update == 1) {
-      //it's going to updated, no need to do anything                            
+      //it's going to updated, no need to do anything
     }
     elseif ($needs_update !== 0) {
       //it's going to inserted, we better insert into our node map too.
