@@ -96,7 +96,7 @@ function content_migrate_prepare_node(&$node, $tblinfo, $row) {
             case 'datetime':
               // Get properly formatted date for value column.
               // Assume timezone and offset values are correct as input.
-              if ($column == 'value') {
+              if ($column == 'value' || $column == 'value2') {
                 if ($field['type'] == 'date' || $field['type'] == 'datetime') {
                   // A value like "1957" could be either a Unix timestamp
                   // or an ISO year-only date... Favor the ISO interpreation
@@ -163,7 +163,6 @@ function content_migrate_prepare_node(&$node, $tblinfo, $row) {
           else {
             $node->$field_name = array($delta => array($column => $value));
           }
-          dpm($node);
         }
       }
 
@@ -172,6 +171,7 @@ function content_migrate_prepare_node(&$node, $tblinfo, $row) {
         unset($node->$dummy_name);
       }
     }
+    // Handle defaulting of date "to" from "from"
   }
 
   return $errors;
