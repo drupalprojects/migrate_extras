@@ -117,11 +117,12 @@ function migrate_extras_migrate_fields_user($type) {
     $fields['md5pass'] = t('User: Password(md5)');
   }
 
-    //set md5 passwords without reencrypting them.
+/* This is already implemented in migrate.module
+  //set md5 passwords without reencrypting them.
   if (variable_get('migrate_extras_set_uid', 0)) {
     $fields['uid'] = t('User: Set UID (dangerous)');
   }
-
+*/
   //set md5 passwords without reencrypting them.
   if (variable_get('migrate_extras_user_fields_all', 0)) {
 
@@ -185,7 +186,7 @@ function migrate_extras_migrate_prepare_user(&$newuser, $tblinfo, $row) {
   // Remove md5pass from the user object
   if (isset($newuser['md5pass'])) {
    //don't want to let this remain in the $user object or it will be stored in $user->data
-    $newuser['md5pass'] = NULL;
+    unset($newuser['md5pass']);
   }
 }
 
