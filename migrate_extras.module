@@ -143,7 +143,8 @@ function migrate_extras_migrate_fields_user($type) {
     $fields['signature_format'] = t('User: Signature Format');
     // The {filter_formats}.format of the signature.
 
-    $fields['status'] = t('User: Status');
+    // Already implemented in migrate.module
+    //$fields['status'] = t('User: Status');
     // Whether the user is active(1) or blocked(0).
 
     $fields['timezone'] = t('User: Timezone');
