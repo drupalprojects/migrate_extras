@@ -158,7 +158,12 @@ function content_migrate_prepare_node(&$node, $tblinfo, $row) {
           }
           // Set the correct node field values.
           if (isset($field_name) && isset($node->$field_name) && is_array($node->$field_name)) {
-            $node->$field_name += array($delta => array($column => $value));
+            if (isset($node->{$field_name}[$delta])) {
+              $node->{$field_name}[$delta] += array($column => $value);
+            }
+            else {
+              $node->$field_name += array($delta => array($column => $value));
+            }
           }
           else {
             $node->$field_name = array($delta => array($column => $value));
