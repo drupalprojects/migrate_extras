@@ -242,7 +242,7 @@ function migrate_extras_migrate_complete_node($node, $tblinfo, $row) {
     }
     //cehck and see if this nid is going to be added or updated.
     $needs_update = db_result(db_query('SELECT needs_update
-                                        FROM {' . $maptables[$tblinfo->mcsid] . "}
+                                        FROM {' . $maptables[$mcsid] . "}
                                         WHERE sourceid='%s'",
                                        $row->$sourcekey));
 
