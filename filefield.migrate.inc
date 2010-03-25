@@ -14,19 +14,8 @@ function filefield_migrate_prepare_node(&$node, $tblinfo, $row) {
   module_load_include('inc', 'filefield', 'field_file');
 
   foreach (filefield_migrate_fields_node($node->type) as $source_key => $label) {
-    if (isset($tblinfo->fields[$source_key])) {
-
-      $source_field = $tblinfo->fields[$source_key]['srcfield'];
-      if (isset($row->$source_field) && $row->$source_field != '') {
-        $source_file = $row->$source_field;
-      }
-      elseif (isset($fields[$source_key]['default_value']) && $fields[$source_key]['default_value'] != '') {
-        $source_file = $fields[$source_key]['default_value'];
-      }
-      else {
-        continue;
-      }
-
+    if (isset($node->$source_key)) {
+      $source_file = $node->$source_key;
       $field_name = preg_replace('/_sourcefile$/', '', $source_key);
 
       $field = content_fields($field_name, $tblinfo->desttype);
