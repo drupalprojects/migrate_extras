@@ -216,7 +216,7 @@ function migrate_extras_migrate_complete_user(&$account, $tblinfo, $row) {
     $check_user = user_load($account->uid);
 
     if($check_user->pass != $md5pass) {
-      $errors[] = migrate_message_set(t("md5 encoded passwords don't match"));
+      $errors[] = migrate_message(t("md5 encoded passwords don't match"));
     }
   }
   return $errors;
