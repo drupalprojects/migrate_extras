@@ -14,7 +14,7 @@ function filefield_migrate_prepare_node(&$node, $tblinfo, $row) {
   module_load_include('inc', 'filefield', 'field_file');
 
   foreach (filefield_migrate_fields_node($node->type) as $source_key => $label) {
-    if (isset($node->$source_key)) {
+    if (!empty($node->$source_key)) {
       $source_file = $node->$source_key;
       $field_name = preg_replace('/_sourcefile$/', '', $source_key);
 
