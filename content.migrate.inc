@@ -14,12 +14,10 @@ class MigrateFieldsNodeHandler extends MigrateDestinationHandler {
   public function fields($bundle) {
     $fields = array();
     if (module_exists('content')) {
-      $field_instance_info = content_fields();
-      foreach ($field_instance_info as $machine_name => $instance) {
-        if ($instance['type_name'] == $bundle) {
-          $fields[$machine_name] = t('Node:') . ' ' . $instance['widget']['label'] .
-            ' (' . $instance['type'] . ')';
-        }
+      $content_info = _content_type_info();
+      foreach ($content_info['content types'][$bundle]['fields'] as $machine_name => $instance) {
+        $fields[$machine_name] = t('Node:') . ' ' . $instance['widget']['label'] .
+          ' (' . $instance['type'] . ')';
       }
     }
     return $fields;
