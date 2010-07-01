@@ -355,23 +355,23 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
     foreach ($values as $value) {
       // Work from a timestamp
       $timestamp = MigrationBase::timestamp($value);
-
       // What does the destination field expect?
       if ($instance['type'] == 'datestamp') {
         // UNIX timestamp
         $value = $timestamp;
       }
       elseif ($instance['type'] == 'datetime') {
-        // YYYY-MM-DD HH:MM:SS
-        $value = format_date($timestamp, 'Y-m-d H:i');
+        // YYYY-MM-DD HH:MM:SS - prevent timezone application
+        $value = format_date($timestamp, 'custom', 'Y-m-d H:i', 0);
       }
       elseif ($instance['type'] == 'date') {
-        // ISO date: YYYY-MM-DDTHH:MM:SS
-        $value = format_date($timestamp, 'Y-m-dTH:i');
+        // ISO date: YYYY-MM-DDTHH:MM:SS - prevent timezone application
+        $value = format_date($timestamp, 'custom', 'Y-m-dTH:i', 0);
       }
       else {
         // Should never get here
       }
+
       $return[$delta]['value'] = $value;
       $delta++;
     }
