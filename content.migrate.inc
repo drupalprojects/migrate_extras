@@ -11,7 +11,7 @@ class MigrateFieldsNodeHandler extends MigrateDestinationHandler {
     $this->registerTypes(array('node'));
   }
 
-  public function fields($bundle) {
+  public function fields($entity_type, $bundle) {
     $fields = array();
     if (module_exists('content')) {
       $content_info = _content_type_info();

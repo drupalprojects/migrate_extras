@@ -34,7 +34,7 @@ function migrate_extras_schema() {
 /**
  * Implementation of hook_install().
  */
-function mymodule_install() {
+function migrate_extras_install() {
   // Create my tables.
   drupal_install_schema('migrate_extras');
 }
@@ -42,9 +42,7 @@ function mymodule_install() {
 /**
  * Implementation of hook_uninstall().
  */
-function mymodule_uninstall() {
+function migrate_extras_uninstall() {
   // Drop my tables.
   drupal_uninstall_schema('migrate_extras');
 }
-
-?>
