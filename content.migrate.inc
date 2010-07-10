@@ -289,7 +289,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
 
 class MigrateNodeReferenceFieldHandler extends MigrateFieldHandler {
   public function __construct() {
-    $this->registerTypes(array('node_reference'));
+    $this->registerTypes(array('nodereference'));
   }
 
   public function prepare(Migration $migration, stdClass $entity, array $instance, array $values) {
@@ -317,7 +317,7 @@ class MigrateNodeReferenceFieldHandler extends MigrateFieldHandler {
 
 class MigrateUserReferenceFieldHandler extends MigrateFieldHandler {
   public function __construct() {
-    $this->registerTypes(array('user_reference'));
+    $this->registerTypes(array('userreference'));
   }
 
   public function prepare(Migration $migration, stdClass $entity, array $instance, array $values) {
