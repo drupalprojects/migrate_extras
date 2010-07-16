@@ -8,7 +8,7 @@
 
 class MigrateFileFieldHandler extends MigrateFieldHandler {
   public function __construct() {
-    $this->registerTypes(array('filefield', 'image'));
+    $this->registerTypes(array('filefield'));
   }
 
   /**
@@ -21,7 +21,6 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
    */
   public function prepare(Migration $migration, stdClass $entity, array $instance, array $values) {
     static $fid;
-drush_print_r($values);
     $arguments = $values['arguments'];
     unset($values['arguments']);
     $delta = 0;
@@ -42,12 +41,10 @@ drush_print_r($values);
 //      $migration->needsUpdate = TRUE;
       return;
     }
-
-    $destination_dir = $instance['settings']['uri_scheme'] . '://' .
-      $instance['settings']['file_directory'];
-    $destination_file = $destination_dir . "/" . basename($full_path);
-    $real_destination_file = drupal_realpath($destination_file);
-
+    $destination_dir = file_directory_path() . DIRECTORY_SEPARATOR . $instance['widget']['file_path'];
+    $destination_file = rtrim($destination_dir, DIRECTORY_SEPARATOR) .
+      DIRECTORY_SEPARATOR . basename($full_path);
+    $real_destination_file = /*realpath*/($destination_file);
     $source = (object) array(
       'uri' => $full_path,
       'uid' => isset($entity->uid) ? isset($entity->uid) : 0,
@@ -84,7 +81,9 @@ drush_print_r($values);
       }
       switch ($file_function) {
         case 'file_copy':
-          $file = file_copy($source, $destination_dir, $arguments['file_replace']);
+//          $file = file_copy($source, $destination_dir, $arguments['file_replace']);
+//          $file = file_copy($full_path);
+          $file = field_file_save_file($full_path, array(), $destination_dir);
           break;
         case 'file_move':
           // file_move() does a copy then delete which slow. So we implement our own.
@@ -135,12 +134,12 @@ drush_print_r($values);
 
     if ($file) {
       // Build up a return object.
-      $object_field['fid'] = $file->fid;
+/*      $object_field['fid'] = $file->fid;
       $object_field['alt'] = isset($arguments['source_alt_name']) ? $values[$arguments['source_alt_name']] : NULL;
       $object_field['title'] = isset($arguments['source_title_name']) ? $values[$arguments['source_title_name']] : NULL;
       $object_field['description'] = isset($arguments['source_description_name']) ? $values[$arguments['source_description_name']] : NULL;
-      $object_field['display'] = isset($arguments['source_display_name']) ? $values[$arguments['source_display_name']] : NULL;
-      $return[$delta] = $object_field;
+      $object_field['display'] = isset($arguments['source_display_name']) ? $values[$arguments['source_display_name']] : NULL;*/
+      $return[$delta] = $file;
       return $return;
     }
     else {
