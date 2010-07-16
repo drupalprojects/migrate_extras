@@ -20,7 +20,6 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
    *  Field API array suitable for inserting in the destination object.
    */
   public function prepare(Migration $migration, stdClass $entity, array $instance, array $values) {
-    static $fid;
     $arguments = $values['arguments'];
     unset($values['arguments']);
     $delta = 0;
@@ -110,9 +109,10 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
           }
           break;
         case 'file_fast':
+          static $fid;
           // Keep re-using an existing file. We still benefit from the file_exists() check above.
           if (!isset($fid)) {
-            $full_path = dirname($_SERVER['SCRIPT_FILENAME']) . '/misc/druplicon.png';
+            $full_path = 'misc/druplicon.png';
             $source = (object) array(
               'uri' => $full_path,
               'uid' => isset($entity->uid) ? isset($entity->uid) : 0,
@@ -120,12 +120,12 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
               'filemime' => file_get_mimetype($full_path),
               'timestamp' => $_SERVER['REQUEST_TIME'],
             );
-            $file = file_copy($source, $destination_dir, FILE_EXISTS_RENAME);
-            $fid = $file->fid;
+            $file = field_file_save_file($full_path, array(), $destination_dir);
+//            $file = file_copy($source, $destination_dir, FILE_EXISTS_RENAME);
+            $fid = $file['fid'];
           }
           else {
-            $file = new stdClass;
-            $file->fid = $fid;
+            $file = array('fid' => $fid);
           }
           break;
       }
