@@ -14,7 +14,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
   /**
    * Prepare file data for saving as a Field API file field.
    *
-   * // TODO: handle multiple values.
+   * TODO: handle multiple values.
    *
    * @return array
    *  Field API array suitable for inserting in the destination object.
@@ -22,8 +22,14 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
   public function prepare(Migration $migration, stdClass $entity, array $instance, array $values) {
     $arguments = $values['arguments'];
     unset($values['arguments']);
+    // One can override a file_function via CLI or drushrc.php
+    if ($migration->getOption('file_function')) {
+      $file_function = $migration->getOption('file_function');
+    }
+    else {
+      $file_function = $arguments['file_function'];
+    }
     $delta = 0;
-
     if ($arguments['source_path']) {
       $full_path = rtrim($arguments['source_path'], DIRECTORY_SEPARATOR) .
         DIRECTORY_SEPARATOR . ltrim($values[$delta], DIRECTORY_SEPARATOR);
@@ -34,7 +40,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
 
     // Check that source exists. If not, mark the entity as 'needs_update' and bail.
     // Sometimes the source file arrives later, when rsync is slower than DB.
-    if (!file_exists($full_path)) {
+    if ($file_function != 'file_fast' && !file_exists($full_path)) {
       $migration->saveMessage(t('Source file does not exist: !path',
         array('!path' => $full_path)), MIGRATION::MESSAGE_WARNING);
 //      $migration->needsUpdate = TRUE;
@@ -71,13 +77,6 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
     }
     else {
       migrate_instrument_start('MigrateFileFieldHandler file_function');
-      // One can override a file_function via CLI or drushrc.php
-      if ($migration->getOption('file_function')) {
-        $file_function = $migration->getOption('file_function');
-      }
-      else {
-        $file_function = $arguments['file_function'];
-      }
       switch ($file_function) {
         case 'file_copy':
 //          $file = file_copy($source, $destination_dir, $arguments['file_replace']);
@@ -134,6 +133,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
 
     if ($file) {
       // Build up a return object.
+      $file['list'] = NULL;
 /*      $object_field['fid'] = $file->fid;
       $object_field['alt'] = isset($arguments['source_alt_name']) ? $values[$arguments['source_alt_name']] : NULL;
       $object_field['title'] = isset($arguments['source_title_name']) ? $values[$arguments['source_title_name']] : NULL;
