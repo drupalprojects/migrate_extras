@@ -12,14 +12,15 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
   }
 
   /**
-   * Prepare file data for saving as a Field API file field.
-   *
-   * TODO: handle multiple values.
+   * Prepare file data for saving as a Field API file field. The job of this
+   * handler is to make sure the file itself ends up in the right place, the
+   * files table row is set up, and the files array returned for each file.
    *
    * @return array
    *  Field API array suitable for inserting in the destination object.
    */
   public function prepare(Migration $migration, stdClass $entity, array $instance, array $values) {
+    $return = array();
     $arguments = $values['arguments'];
     unset($values['arguments']);
     // One can override a file_function via CLI or drushrc.php
@@ -29,122 +30,106 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
     else {
       $file_function = $arguments['file_function'];
     }
-    $delta = 0;
-    if ($arguments['source_path']) {
-      $full_path = rtrim($arguments['source_path'], DIRECTORY_SEPARATOR) .
-        DIRECTORY_SEPARATOR . ltrim($values[$delta], DIRECTORY_SEPARATOR);
-    }
-    else {
-      $full_path = $values[$delta];
-    }
-
-    // Check that source exists. If not, mark the entity as 'needs_update' and bail.
-    // Sometimes the source file arrives later, when rsync is slower than DB.
-    if ($file_function != 'file_fast' && !file_exists($full_path)) {
-      $migration->saveMessage(t('Source file does not exist: !path',
-        array('!path' => $full_path)), MIGRATION::MESSAGE_WARNING);
-//      $migration->needsUpdate = TRUE;
-      return;
-    }
-    $destination_dir = file_directory_path() . DIRECTORY_SEPARATOR . $instance['widget']['file_path'];
-    $destination_file = rtrim($destination_dir, DIRECTORY_SEPARATOR) .
-      DIRECTORY_SEPARATOR . basename($full_path);
-    $real_destination_file = /*realpath*/($destination_file);
-    $source = (object) array(
-      'uri' => $full_path,
-      'uid' => isset($entity->uid) ? isset($entity->uid) : 0,
-      'filename' => basename($full_path),
-      'filemime' => file_get_mimetype($full_path),
-      'timestamp' => $_SERVER['REQUEST_TIME'],
-    );
-
-    // Check that destination does not exist. If it does, reuse it and return.
-    if (file_exists($real_destination_file)) {
-      // Save this file to DB.
-      if ($existing_files = file_load_multiple(array(), array('uri' => $destination_file))) {
-        // Existing record exists. Reuse it. TODO: Perhaps we never should re-use records.
-        $file = reset($existing_files);
-        $file = file_save($file);
+    foreach ($values as $delta => $file_path) {
+      if ($arguments['source_path']) {
+        $full_path = rtrim($arguments['source_path'], DIRECTORY_SEPARATOR) .
+          DIRECTORY_SEPARATOR . ltrim($file_path, DIRECTORY_SEPARATOR);
       }
       else {
-        // Get this orphaned file into the file table.
-        $file = clone $source;
-        $file->fid = NULL;
-        $file->uri = $destination_file;
-        $file->status |= FILE_STATUS_PERMANENT; // Save a write in file_field_presave().
-        $file = file_save($file);
+        $full_path = $file_path;
       }
-    }
-    else {
+
+      $destination_dir = file_directory_path() . DIRECTORY_SEPARATOR . $instance['widget']['file_path'];
+      $destination_file = rtrim($destination_dir, DIRECTORY_SEPARATOR) .
+        DIRECTORY_SEPARATOR . basename($full_path);
       migrate_instrument_start('MigrateFileFieldHandler file_function');
       switch ($file_function) {
+        // These physically transfer the file to the destination, applying
+        // the file_replace setting if the file already exists
         case 'file_copy':
-//          $file = file_copy($source, $destination_dir, $arguments['file_replace']);
-//          $file = file_copy($full_path);
-          $file = field_file_save_file($full_path, array(), $destination_dir);
-          break;
         case 'file_move':
-          // file_move() does a copy then delete which slow. So we implement our own.
-          if (file_prepare_directory($destination_dir)) {
-            if (rename($source->uri, $real_destination_file)) {
-              $file = clone $source;
-              $file->fid = NULL;
-              $file->uri = $destination_file;
-              $file->status |= FILE_STATUS_PERMANENT; // Save a write in file_field_presave().
-              $file = file_save($file);
-
-              // Inform modules that the file has been copied.
-              module_invoke_all('file_copy', $file, $source);
-              break;
-            }
-            else {
-              $migration->saveMessage(t('Unable to rename !source to !uri', array('!source' => $source->uri, '!uri' => $destination_file)), MIGRATION::MESSAGE_ERROR);
-              return;
-            }
+          // Check that source exists. If not, mark the entity as 'needs_update' and bail.
+          // Sometimes the source file arrives later, when rsync is slower than DB.
+          if (!file_exists($full_path)) {
+            $migration->saveMessage(t('Source file does not exist: !path',
+              array('!path' => $full_path)), MigrationBase::MESSAGE_INFORMATIONAL);
+      // TODO     $migration->needsUpdate = TRUE;
+            continue;
           }
-          else {
-             $migration->saveMessage(t('Unable to prepare directory !dir', array('!dir' => $destination_dir)), MIGRATION::MESSAGE_ERROR);
-             return;
+          // TODO: FILE_EXISTS_REPLACE is hardcoded
+          // TODO: Should retrieve and pass validators in 2nd arg
+          $file = field_file_save_file($full_path, array(), $destination_dir);
+          if ($file_function == 'file_move') {
+            // TODO: Optimize by using rename()
+            unlink($full_path);
           }
           break;
         case 'file_fast':
           static $fid;
-          // Keep re-using an existing file. We still benefit from the file_exists() check above.
+          // Keep re-using an existing file.
           if (!isset($fid)) {
             $full_path = 'misc/druplicon.png';
-            $source = (object) array(
-              'uri' => $full_path,
-              'uid' => isset($entity->uid) ? isset($entity->uid) : 0,
-              'filename' => basename($full_path),
-              'filemime' => file_get_mimetype($full_path),
-              'timestamp' => $_SERVER['REQUEST_TIME'],
-            );
             $file = field_file_save_file($full_path, array(), $destination_dir);
-//            $file = file_copy($source, $destination_dir, FILE_EXISTS_RENAME);
+  //          $file = file_copy($source, $destination_dir, FILE_EXISTS_RENAME);
             $fid = $file['fid'];
           }
           else {
             $file = array('fid' => $fid);
           }
           break;
+        case 'file_link':
+          // The file is copied by some outside process (e.g., rsync), and we
+          // just need to make sure it's present and has a files table row.
+          // Not present - skip
+          if (!file_exists($full_path)) {
+            drush_print("doesn't exist: $full_path");
+            $migration->saveMessage(t('File does not exist in Drupal files directory: !path',
+              array('!path' => $full_path)), MigrationBase::MESSAGE_INFORMATIONAL);
+      // TODO     $migration->needsUpdate = TRUE;
+            continue;
+          }
+
+          // Files table entry exists? Use that...
+          $file = db_select('files', 'f')
+                  ->fields('f')
+                  ->condition('filepath', $full_path)
+                  ->execute()
+                  ->fetchAssoc();
+          if (!$file) {
+            $file = new stdClass;
+            $file->uri = $full_path;
+            $file->uid = isset($entity->uid) ? $entity->uid : 0;
+            $file->filename = basename($full_path);
+            $file->filepath = $full_path;
+            $file->filemime = file_get_mimetype($full_path);
+            $file->timestamp = $_SERVER['REQUEST_TIME'];
+            $file->filesize = filesize($full_path);
+            $file->status = FILE_STATUS_PERMANENT;
+            drupal_write_record('files', $file);
+            $file = (array)$file;
+          }
+          break;
+        default:
+          $migration->saveMessage(t('Unrecognized file_function: !func', array('!func' => $file_function)));
+          break;
       }
       migrate_instrument_stop('MigrateFileFieldHandler file_function');
-    }
 
-    if ($file) {
-      // Build up a return object.
-      $file['list'] = NULL;
-/*      $object_field['fid'] = $file->fid;
-      $object_field['alt'] = isset($arguments['source_alt_name']) ? $values[$arguments['source_alt_name']] : NULL;
-      $object_field['title'] = isset($arguments['source_title_name']) ? $values[$arguments['source_title_name']] : NULL;
-      $object_field['description'] = isset($arguments['source_description_name']) ? $values[$arguments['source_description_name']] : NULL;
-      $object_field['display'] = isset($arguments['source_display_name']) ? $values[$arguments['source_display_name']] : NULL;*/
-      $return[$delta] = $file;
-      return $return;
+      if ($file) {
+        // Build up a return object.
+        $file['list'] = NULL;
+  /*      $object_field['fid'] = $file->fid;
+        $object_field['alt'] = isset($arguments['source_alt_name']) ? $values[$arguments['source_alt_name']] : NULL;
+        $object_field['title'] = isset($arguments['source_title_name']) ? $values[$arguments['source_title_name']] : NULL;
+        $object_field['description'] = isset($arguments['source_description_name']) ? $values[$arguments['source_description_name']] : NULL;
+        $object_field['display'] = isset($arguments['source_display_name']) ? $values[$arguments['source_display_name']] : NULL;*/
+        $return[] = $file;
+      }
+      else {
+        $migration->saveMessage(t('Unable to create file record for !path', array('!path' => $full_path)), Migration::MESSAGE_ERROR);
+      }
     }
-    else {
-      $migration->saveMessage(t('Unable to create file record for !path', array('!path' => $full_path)), MIGRATION::MESSAGE_ERROR);
-    }
+    return $return;
   }
 
   /*
