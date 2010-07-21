@@ -82,7 +82,6 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
           // just need to make sure it's present and has a files table row.
           // Not present - skip
           if (!file_exists($full_path)) {
-            drush_print("doesn't exist: $full_path");
             $migration->saveMessage(t('File does not exist in Drupal files directory: !path',
               array('!path' => $full_path)), MigrationBase::MESSAGE_INFORMATIONAL);
       // TODO     $migration->needsUpdate = TRUE;
