@@ -31,6 +31,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
       $file_function = $arguments['file_function'];
     }
     foreach ($values as $delta => $file_path) {
+      $message_saved = FALSE;
       if ($arguments['source_path']) {
         $full_path = rtrim($arguments['source_path'], DIRECTORY_SEPARATOR) .
           DIRECTORY_SEPARATOR . ltrim($file_path, DIRECTORY_SEPARATOR);
@@ -53,6 +54,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
           if (!file_exists($full_path)) {
             $migration->saveMessage(t('Source file does not exist: !path',
               array('!path' => $full_path)), MigrationBase::MESSAGE_INFORMATIONAL);
+            $message_saved = TRUE;
       // TODO     $migration->needsUpdate = TRUE;
             continue;
           }
@@ -84,6 +86,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
           if (!file_exists($full_path)) {
             $migration->saveMessage(t('File does not exist in Drupal files directory: !path',
               array('!path' => $full_path)), MigrationBase::MESSAGE_INFORMATIONAL);
+            $message_saved = TRUE;
       // TODO     $migration->needsUpdate = TRUE;
             continue;
           }
@@ -110,11 +113,12 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
           break;
         default:
           $migration->saveMessage(t('Unrecognized file_function: !func', array('!func' => $file_function)));
+          $message_saved = TRUE;
           break;
       }
       migrate_instrument_stop('MigrateFileFieldHandler file_function');
 
-      if ($file) {
+      if (isset($file) && is_array($file)) {
         // Build up a return object.
         $file['list'] = NULL;
   /*      $object_field['fid'] = $file->fid;
@@ -124,7 +128,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
         $object_field['display'] = isset($arguments['source_display_name']) ? $values[$arguments['source_display_name']] : NULL;*/
         $return[] = $file;
       }
-      else {
+      elseif (!$message_saved) {
         $migration->saveMessage(t('Unable to create file record for !path', array('!path' => $full_path)), Migration::MESSAGE_ERROR);
       }
     }
