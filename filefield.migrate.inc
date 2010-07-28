@@ -83,21 +83,28 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
           // The file is copied by some outside process (e.g., rsync), and we
           // just need to make sure it's present and has a files table row.
           // Not present - skip
+          migrate_instrument_start('file_link: file_exists');
           if (!file_exists($full_path)) {
+            migrate_instrument_stop('file_link: file_exists');
             $migration->saveMessage(t('File does not exist in Drupal files directory: !path',
               array('!path' => $full_path)), MigrationBase::MESSAGE_INFORMATIONAL);
             $message_saved = TRUE;
       // TODO     $migration->needsUpdate = TRUE;
             continue;
           }
+          migrate_instrument_stop('file_link: file_exists');
 
           // Files table entry exists? Use that...
+          migrate_instrument_start('file_link: select existing');
+          // Note that indexing files.filepath can be very helpful
           $file = db_select('files', 'f')
                   ->fields('f')
                   ->condition('filepath', $full_path)
                   ->execute()
                   ->fetchAssoc();
+          migrate_instrument_stop('file_link: select existing');
           if (!$file) {
+            migrate_instrument_start('file_link: create file record');
             $file = new stdClass;
             $file->uri = $full_path;
             $file->uid = isset($entity->uid) ? $entity->uid : 0;
@@ -109,6 +116,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
             $file->status = FILE_STATUS_PERMANENT;
             drupal_write_record('files', $file);
             $file = (array)$file;
+            migrate_instrument_stop('file_link: create file record');
           }
           break;
         default:
