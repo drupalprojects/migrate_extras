@@ -52,8 +52,13 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
           // Check that source exists. If not, mark the entity as 'needs_update' and bail.
           // Sometimes the source file arrives later, when rsync is slower than DB.
           if (!file_exists($full_path)) {
-            $migration->saveMessage(t('Source file does not exist: !path',
-              array('!path' => $full_path)), MigrationBase::MESSAGE_INFORMATIONAL);
+            $message = t('Source file does not exist: !path', array('!path' => $full_path));
+            if ($arguments['throw_error']) {
+              throw new MigrateException($message, MigrationBase::MESSAGE_ERROR);
+            }
+            else {
+              $migration->saveMessage($message, MigrationBase::MESSAGE_INFORMATIONAL);
+            }
             $message_saved = TRUE;
       // TODO     $migration->needsUpdate = TRUE;
             continue;
@@ -86,8 +91,14 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
           migrate_instrument_start('file_link: file_exists');
           if (!file_exists($full_path)) {
             migrate_instrument_stop('file_link: file_exists');
-            $migration->saveMessage(t('File does not exist in Drupal files directory: !path',
-              array('!path' => $full_path)), MigrationBase::MESSAGE_INFORMATIONAL);
+            $message = t('File does not exist in Drupal files directory: !path',
+              array('!path' => $full_path));
+            if ($arguments['throw_error']) {
+              throw new MigrateException($message, MigrationBase::MESSAGE_ERROR);
+            }
+            else {
+              $migration->saveMessage($message, MigrationBase::MESSAGE_INFORMATIONAL);
+            }
             $message_saved = TRUE;
       // TODO     $migration->needsUpdate = TRUE;
             continue;
@@ -137,7 +148,8 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
         $return[] = $file;
       }
       elseif (!$message_saved) {
-        $migration->saveMessage(t('Unable to create file record for !path', array('!path' => $full_path)), Migration::MESSAGE_ERROR);
+        throw new MigrateException(t('Unable to create file record for !path', 
+          array('!path' => $full_path)), Migration::MESSAGE_ERROR);
       }
     }
     return $return;
@@ -158,12 +170,15 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
    * @param source_title_name
    * @param source_description_name
    * @param source_display_name
+   * @param throw_error
+   *  A non-existent file generates an INFORMATIONAL message by default. If this
+   *  parameter is TRUE, throw an error instead (abort node creation).
    *
    */
  static function arguments($source_path = NULL, $file_function = 'file_copy',
       $file_replace = FILE_EXISTS_RENAME, $source_alt_name = NULL,
       $source_title_name = NULL, $source_description_name = NULL,
-      $source_display_name = NULL) {
+      $source_display_name = NULL, $throw_error = FALSE) {
     return get_defined_vars();
   }
 }
