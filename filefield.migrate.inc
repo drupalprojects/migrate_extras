@@ -19,7 +19,8 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
    * @return array
    *  Field API array suitable for inserting in the destination object.
    */
-  public function prepare(Migration $migration, stdClass $entity, array $instance, array $values) {
+  public function prepare(stdClass $entity, array $instance, array $values) {
+    $migration = Migration::currentMigration();
     $return = array();
     $arguments = $values['arguments'];
     unset($values['arguments']);
@@ -31,6 +32,9 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
       $file_function = $arguments['file_function'];
     }
     foreach ($values as $delta => $file_path) {
+      if (!$file_path) {
+        continue;
+      }
       $message_saved = FALSE;
       if ($arguments['source_path']) {
         $full_path = rtrim($arguments['source_path'], DIRECTORY_SEPARATOR) .
@@ -43,6 +47,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
       $destination_dir = file_directory_path() . DIRECTORY_SEPARATOR . $instance['widget']['file_path'];
       $destination_file = rtrim($destination_dir, DIRECTORY_SEPARATOR) .
         DIRECTORY_SEPARATOR . basename($full_path);
+
       migrate_instrument_start('MigrateFileFieldHandler file_function');
       switch ($file_function) {
         // These physically transfer the file to the destination, applying
@@ -148,7 +153,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
         $return[] = $file;
       }
       elseif (!$message_saved) {
-        throw new MigrateException(t('Unable to create file record for !path', 
+        throw new MigrateException(t('Unable to create file record for !path',
           array('!path' => $full_path)), Migration::MESSAGE_ERROR);
       }
     }

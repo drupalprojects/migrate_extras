@@ -18,9 +18,14 @@ class MigratePathautoHandler extends MigrateDestinationHandler {
    * Make the destination field visible.
    */
   public function fields() {
-    return array(
-      'pathauto_perform_alias' =>
-        t('Pathauto: Perform aliasing (set to 0 to prevent alias generation during migration'),
-    );
+    if (module_exists('pathauto')) {
+      return array(
+        'pathauto_perform_alias' =>
+          t('Pathauto: Perform aliasing (set to 0 to prevent alias generation during migration'),
+      );
+    }
+    else {
+      return array();
+    }
   }
 }

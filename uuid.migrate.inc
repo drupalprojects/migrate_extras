@@ -18,9 +18,14 @@ class MigrateUuidHandler extends MigrateDestinationHandler {
    * Make the destination field visible.
    */
   public function fields() {
-    return array(
-      'uuid' => t('Universally Unique IDentifier'),
-    );
+    if (module_exists('uuid')) {
+      return array(
+        'uuid' => t('Universally Unique IDentifier'),
+      );
+    }
+    else {
+      return array();
+    }
   }
 }
 
@@ -37,9 +42,13 @@ class MigrateUuidNodeHandler extends MigrateDestinationHandler {
    * Make the destination field visible.
    */
   public function fields() {
-    return array(
-      'uuid' => t('Universally Unique IDentifier'),
-      'revision_uuid' => t('Universally Unique IDentifier (revision)'),
-    );
+    if (module_exists('uuid')) {
+      return array(
+        'uuid' => t('Universally Unique IDentifier'),
+        'revision_uuid' => t('Universally Unique IDentifier (revision)'),
+      );
+    } else {
+      return array();
+    }
   }
 }

@@ -15,8 +15,13 @@ class MigratePageTitleNodeHandler extends MigrateDestinationHandler {
    * Make the destination field visible.
    */
   public function fields() {
-    return array(
-      'page_title' => t('Page Title: Title for &lt;title&gt; tag'),
-    );
+    if (module_exists('page_title')) {
+      return array(
+        'page_title' => t('Page Title: Title for &lt;title&gt; tag'),
+      );
+    }
+    else {
+      return array();
+    }
   }
 }
