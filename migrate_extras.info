@@ -5,6 +5,7 @@ core = 6.x
 package=Development
 
 dependencies[] = migrate
+files[] = og.migrate.inc
 files[] = content.migrate.inc
 files[] = filefield.migrate.inc
 files[] = nodewords.migrate.inc
