@@ -34,7 +34,7 @@ class MigrateDestinationOGMembership extends MigrateDestination {
    * @param $id
    *  ID to be deleted.
    */
-  public function rollback(Migration $migration, array $id) {
+  public function rollback(array $id) {
     migrate_instrument_start('OGMembership bulkRollback');
     og_delete_subscription($id['gid'], $id['uid']);
     migrate_instrument_stop('OGMembership bulkRollback');
@@ -53,7 +53,7 @@ class MigrateDestinationOGMembership extends MigrateDestination {
    *  Array of key fields of the object that was saved if
    *  successful. FALSE on failure.
    */
-  public function import(Migration $migration, stdClass $entity, stdClass $row) {
+  public function import(stdClass $entity, stdClass $row) {
     // TODO
     $args = array(
         'is_active' => $entity->is_active,
