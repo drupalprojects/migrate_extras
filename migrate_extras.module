@@ -8,7 +8,7 @@ function migrate_extras_migrate_api() {
   // it, but disable the others to avoid function redeclaration errors if/when
   // those modules support migrate directly.
   $api = array(
-    'api' => 1,
+    'api' => 2,
     'integration modules' => array(
       'content',
       'content_profile' => array('status' => FALSE),
@@ -26,46 +26,37 @@ function migrate_extras_migrate_api() {
  */
 function migrate_extras_settings() {
   $form = array();
-  
+
   $form['users'] = array(
     '#type' => 'fieldset',
     '#title' => t('Users'),
   );
-  
-  //this should be moved to migrate_module  
+
+  //this should be moved to migrate_module
   $form['users']['migrate_extras_use_md5'] = array(
     '#type' => 'checkbox',
     '#title' => t('MD5 password field'),
     '#default_value' => variable_get('migrate_extras_use_md5', 0),
-    '#description' => t("Enable an md5 password field for users, use 
+    '#description' => t("Enable an md5 password field for users, use
       this if you are migrating passwords that are already encrypted."),
   );
-   
+
   $form['users']['migrate_extras_user_fields_all'] = array(
     '#type' => 'checkbox',
     '#title' => t("Use all user fields"),
     '#default_value' => variable_get('migrate_extras_user_fields_all', 0),
-    '#description' => t('Enable all the core drupal user fields 
+    '#description' => t('Enable all the core drupal user fields
       available, for advanced imports. None of these fields are required
-      to import users. Some fields may only take data in specialized 
+      to import users. Some fields may only take data in specialized
       format. See <a href="http://api.drupal.org/api/function/user_schema">
       http://api.drupal.org/api/function/user_schema</a> for more info.'),
   );
-/*  This is already implemented at migrate module.
-  $form['users']['migrate_extras_set_uid'] = array(
-    '#type' => 'checkbox',
-    '#title' => t("Set User ID explicitly (dangerous)"),
-    '#default_value' => variable_get('migrate_extras_set_uid', 0),
-    '#description' => t("This will set the user id of the imported user,
-       which means that you may overwrite your existing users, including 
-       user 1. Use with extreme caution."),
-  );
-*/  
+
   $form['node'] = array(
     '#type' => 'fieldset',
     '#title' => t('Nodes'),
   );
-  
+
   $form['node']['migrate_extras_use_master_node_map'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use the migrate extras master node map.'),
@@ -89,7 +80,7 @@ function migrate_extras_menu() {
 
   $items = array();
 
-  $items['admin/content/migrate/extras'] = array(
+  $items['admin/migrate/extras'] = array(
     'title' => 'Extras',
     'description' => 'Migrate Extras module settings',
     'weight' => 10,
@@ -108,6 +99,7 @@ function migrate_extras_menu() {
 
 /**
  * Implementation of hook_migrate_destination_fields_user().
+ * TODO: Port fucntionality to Migrate 2
  */
 function migrate_extras_migrate_fields_user($type) {
   $fields = array();
@@ -173,6 +165,7 @@ function migrate_extras_migrate_fields_user($type) {
 
 /**
  * Implementation of hook_migrate_destination_prepare_user().
+ * TODO: Port fucntionality to Migrate 2
  */
 function migrate_extras_migrate_prepare_user(&$newuser, $tblinfo, $row) {
   //note new user is an array, not object
@@ -190,20 +183,22 @@ function migrate_extras_migrate_prepare_user(&$newuser, $tblinfo, $row) {
 
 /**
  * Implementation of hook_migrate_destination_fields_user().
+ * TODO: Port functionality to Migrate 2
  */
 function migrate_extras_migrate_complete_user(&$account, $tblinfo, $row) {
-  $errors = array();
+/*  $errors = array();
   $md5pass = FALSE;
   if (isset($tblinfo->fields['md5pass']['srcfield'])) {
     $md5_src = $tblinfo->fields['md5pass']['srcfield'];
-    if(isset($row->$md5_src) {
+    if (isset($row->$md5_src)) {
       $md5pass = $row->$md5_src;
+    }
     else {
       $errors[] = migrate_message('No MD5 password provided for this user.');
       return $errors;
     }
   }
-  
+
   //restore the original md5password
   if ($account->uid && $md5pass !== FALSE && variable_get('migrate_extras_use_md5', 0)) {
 
@@ -216,7 +211,7 @@ function migrate_extras_migrate_complete_user(&$account, $tblinfo, $row) {
       $errors[] = migrate_message_set(t("md5 encoded passwords don't match"));
     }
   }
-  return $errors;
+  return $errors;*/
 }
 
 
@@ -227,13 +222,14 @@ function migrate_extras_migrate_complete_user(&$account, $tblinfo, $row) {
 
 /**
  * Implementation of hook_migrate_complete_node().
+ * TODO: Port functionality to Migrate 2
  */
 function migrate_extras_migrate_complete_node($node, $tblinfo, $row) {
   //store node mappings in a master node map table
   if (variable_get('migrate_extras_use_master_node_map', 0) && $node->nid) {
     $sourcekey = $tblinfo->sourcekey;
     static $maptables = array();
-    
+
     if (!isset($maptables[$mcsid])) {
       $maptables[$mcsid] = migrate_map_table_name($tblinfo->mcsid);
     }
@@ -242,9 +238,9 @@ function migrate_extras_migrate_complete_node($node, $tblinfo, $row) {
                                         FROM {' . $maptables[$tblinfo->mcsid] . "}
                                         WHERE sourceid='%s'",
                                        $row->$sourcekey));
-    
+
     if ($needs_update == 1) {
-      //it's going to updated, no need to do anything                            
+      //it's going to updated, no need to do anything
     }
     elseif ($needs_update !== 0) {
       //it's going to inserted, we better insert into our node map too.
@@ -257,6 +253,7 @@ function migrate_extras_migrate_complete_node($node, $tblinfo, $row) {
 
 /**
  * Implementation of hook_migrate_delete_node().
+ * TODO: Port functionality to Migrate 2
  */
 function migrate_extras_migrate_delete_node($nid) {
   //delete any node mappings in the master node map table. We'll leave this on always.
