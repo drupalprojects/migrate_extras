@@ -54,6 +54,13 @@ class MigrateDestinationOGMembership extends MigrateDestination {
    *  successful. FALSE on failure.
    */
   public function import(stdClass $entity, stdClass $row) {
+    if (empty($entity->gid)) {
+      throw MigrateException('Missing $entity->gid');
+    }
+    if (empty($entity->uid)) {
+      throw MigrateException('Missing $entity->uid');
+    }
+    
     // TODO
     $args = array(
         'is_active' => $entity->is_active,
