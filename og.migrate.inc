@@ -55,10 +55,10 @@ class MigrateDestinationOGMembership extends MigrateDestination {
    */
   public function import(stdClass $entity, stdClass $row) {
     if (empty($entity->gid)) {
-      throw MigrateException('Missing $entity->gid');
+      throw new MigrateException('Missing $entity->gid');
     }
     if (empty($entity->uid)) {
-      throw MigrateException('Missing $entity->uid');
+      throw new MigrateException('Missing $entity->uid');
     }
     
     // TODO
