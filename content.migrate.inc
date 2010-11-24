@@ -216,3 +216,10 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
     return $return;
   }
 }
+
+// Just inherit everything from text. 
+class MigrateEmailFieldHandler extends MigrateTextFieldHandler {
+  public function __construct() {
+    $this->registerTypes(array('email'));
+  }  
+}
