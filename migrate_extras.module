@@ -86,7 +86,7 @@ function migrate_extras_menu() {
     'weight' => 10,
     'page callback' => 'drupal_get_form',
     'page arguments' => array('migrate_extras_settings'),
-    'access arguments' => array(MIGRATE_ACCESS_ADVANCED),
+    'access arguments' => array(MIGRATE_ACCESS_BASIC),
     'type' => MENU_LOCAL_TASK,
   );
 
