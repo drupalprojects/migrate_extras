@@ -130,6 +130,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
             $file->timestamp = $_SERVER['REQUEST_TIME'];
             $file->filesize = filesize($full_path);
             $file->status = FILE_STATUS_PERMANENT;
+            $file->data['process'] = TRUE; // This activates filefield_paths crazy move code.
             drupal_write_record('files', $file);
             $file = (array)$file;
             migrate_instrument_stop('file_link: create file record');
