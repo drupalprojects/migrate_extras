@@ -43,8 +43,6 @@ class MigrateDestinationOGMembership extends MigrateDestination {
   /**
    * Import a single membership.
    *
-   * @param $migration
-   *  Controlling migration object. Passed through to prepare/complete handlers.
    * @param $entity
    *  Object object to build. Prefilled with any fields mapped in the Migration.
    * @param $row
