@@ -65,6 +65,7 @@ class MigrateDestinationUserRelationships extends MigrateDestination {
     
     $entity->rtid = $this->rtid;
     
+    $op = isset($entity->op) ? $entity->op : 'approve';
     if (user_relationships_save_relationship($entity, $op)) {
       return array($entity->rid);
     }
@@ -79,6 +80,7 @@ class MigrateDestinationUserRelationships extends MigrateDestination {
         'created_at' => '',
         'updated_at' => '',
         'flags' => '',
+        'op' => ''
     );
   }
 }
