@@ -12,6 +12,11 @@
  * Destination class implementing migration into user_relationships table.
  */
 class MigrateDestinationUserRelationships extends MigrateDestination {
+  public function __construct($rtid) {
+    parent::__construct();
+    $this->rtid = $rtid;
+  }
+  
   static public function getKeySchema() {
     return array(
       'rid' => array(
@@ -58,6 +63,8 @@ class MigrateDestinationUserRelationships extends MigrateDestination {
       }
     }
     
+    $entity->rtid = $this->rtid;
+    
     if (user_relationships_save_relationship($entity, $op)) {
       return array($entity->rid);
     }
@@ -68,7 +75,6 @@ class MigrateDestinationUserRelationships extends MigrateDestination {
         'rid' => 'Relationship ID',
         'requester_id' => '',
         'requestee_id' => '',
-        'rtid' => '',
         'approved' => '',
         'created_at' => '',
         'updated_at' => '',
