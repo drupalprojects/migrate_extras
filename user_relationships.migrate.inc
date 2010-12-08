@@ -37,9 +37,10 @@ class MigrateDestinationUserRelationships extends MigrateDestination {
    */
   public function rollback(array $id) {
     migrate_instrument_start(__METHOD__);
-    $relationship = user_relationships_load(array('rid' => $id));
-    $account = new stdClass;
-    user_relationships_delete_relationship($relationship, $account);
+    if ($relationship = user_relationships_load(array('rid' => $id['destid1']))) {
+      $account = new stdClass;
+      user_relationships_delete_relationship(current($relationship), $account);
+    }
     migrate_instrument_stop(__METHOD__);
   }
 
