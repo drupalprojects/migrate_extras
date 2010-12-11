@@ -44,7 +44,18 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
         $full_path = $file_path;
       }
 
-      $destination_dir = file_directory_path() . DIRECTORY_SEPARATOR . $instance['widget']['file_path'];
+      // Set destination_dir, considering user tokens which filefield natively supports.
+      if (!module_exists('filefield_paths') && isset($entity->uid) && strpos($instance['widget']['file_path'], '[')) {
+        $account = user_load(array('uid' => $entity->uid));
+        $destination_dir = filefield_widget_file_path($instance, $account);
+      }
+      else {
+        // Set a default destination_dir.
+        $destination_dir = file_directory_path() . DIRECTORY_SEPARATOR . $instance['widget']['file_path'];
+      }
+
+      // file_check_directory does not do $recursive so we create dir ourselves.
+      mkdir($destination_dir, 0777, TRUE);
       $destination_file = rtrim($destination_dir, DIRECTORY_SEPARATOR) .
         DIRECTORY_SEPARATOR . basename($full_path);
 
