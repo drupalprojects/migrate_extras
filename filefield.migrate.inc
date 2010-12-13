@@ -55,7 +55,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
       }
 
       // file_check_directory does not do $recursive so we create dir ourselves.
-      mkdir($destination_dir, 0777, TRUE);
+      @mkdir($destination_dir, 0777, TRUE);
       $destination_file = rtrim($destination_dir, DIRECTORY_SEPARATOR) .
         DIRECTORY_SEPARATOR . basename($full_path);
 
