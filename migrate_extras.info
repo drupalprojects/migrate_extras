@@ -6,3 +6,4 @@ package=Development
 
 dependencies[] = migrate
 files[] = pathauto.migrate.inc
+files[] = rules.migrate.inc
