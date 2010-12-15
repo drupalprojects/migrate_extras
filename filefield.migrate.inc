@@ -45,6 +45,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
       }
 
       // Set destination_dir, considering user tokens which filefield natively supports.
+      // Also load $account or build a stub (faster)
       if (!module_exists('filefield_paths') && isset($entity->uid) && strpos($instance['widget']['file_path'], '[')) {
         $account = user_load(array('uid' => $entity->uid));
         $destination_dir = filefield_widget_file_path($instance, $account);
@@ -81,7 +82,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
           }
           // TODO: FILE_EXISTS_REPLACE is hardcoded
           // TODO: Should retrieve and pass validators in 2nd arg
-          $file = field_file_save_file($full_path, array(), $destination_dir);
+          $file = field_file_save_file($full_path, array(), $destination_dir, $account);
           if ($file_function == 'file_move') {
             // TODO: Optimize by using rename()
             unlink($full_path);
@@ -92,7 +93,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
           // Keep re-using an existing file.
           if (!isset($fid)) {
             $full_path = 'misc/druplicon.png';
-            $file = field_file_save_file($full_path, array(), $destination_dir);
+            $file = field_file_save_file($full_path, array(), $destination_dir, $account);
   //          $file = file_copy($source, $destination_dir, FILE_EXISTS_RENAME);
             $fid = $file['fid'];
           }
@@ -123,7 +124,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
 
           // Files table entry exists? Use that...
           migrate_instrument_start('file_link: select existing');
-          // Note that indexing files.filepath can be very helpful
+          // Note that indexing files.filepath can be very helpful.
           $file = db_select('files', 'f')
                   ->fields('f')
                   ->condition('filepath', $full_path)
@@ -141,7 +142,7 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
             $file->timestamp = $_SERVER['REQUEST_TIME'];
             $file->filesize = filesize($full_path);
             $file->status = FILE_STATUS_PERMANENT;
-            $file->data['process'] = TRUE; // This activates filefield_paths crazy move code.
+
             drupal_write_record('files', $file);
             $file = (array)$file;
             migrate_instrument_stop('file_link: create file record');
@@ -157,11 +158,13 @@ class MigrateFileFieldHandler extends MigrateFieldHandler {
       if (isset($file) && is_array($file)) {
         // Build up a return object.
         $file['list'] = NULL;
-  /*      $object_field['fid'] = $file->fid;
-        $object_field['alt'] = isset($arguments['source_alt_name']) ? $values[$arguments['source_alt_name']] : NULL;
-        $object_field['title'] = isset($arguments['source_title_name']) ? $values[$arguments['source_title_name']] : NULL;
-        $object_field['description'] = isset($arguments['source_description_name']) ? $values[$arguments['source_description_name']] : NULL;
-        $object_field['display'] = isset($arguments['source_display_name']) ? $values[$arguments['source_display_name']] : NULL;*/
+        $file['data'] = array(
+          'alt' => isset($arguments['source_alt_name']) ? $arguments['source_alt_name'] : NULL,
+          'title' => isset($arguments['source_title_name']) ? $arguments['source_title_name'] : NULL,
+          'description' => isset($arguments['source_description_name']) ? $arguments['source_description_name'] : NULL,
+          'display' => isset($arguments['source_display_name']) ? $arguments['source_display_name'] : NULL,
+          'process' => TRUE, // This activates filefield_paths crazy move code.
+        );
         $return[] = $file;
       }
       elseif (!$message_saved) {
