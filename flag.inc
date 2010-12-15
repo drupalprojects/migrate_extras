@@ -55,7 +55,7 @@ class MigrateDestinationFlagSimple extends MigrateDestination {
     
     $entity->fid = $this->fid;
     
-    if ($entity->fcid) {
+    if (!empty($entity->fcid)) {
       $return = drupal_write_record('flag_content', $entity, 'fcid');  
     }
     else {
