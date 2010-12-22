@@ -1,0 +1,121 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Support for media destinations.
+ */
+
+/**
+ * Destination class implementing migration into media entities.
+ */
+class MigrateDestinationMedia extends MigrateDestinationFile {
+  /**
+   * List of node migrations, whose bodies need image references fixed up.
+   *
+   * @var array
+   */
+  protected $sourceMigrations = array();
+
+  /**
+   * Return an options array for media destinations.
+   *
+   * @param array $source_migrations
+   *  List of node migrations, whose bodies need image references fixed up.
+   * @param boolean $copy_file
+   *  TRUE to have the file copied from the provided URI to Drupal. Defaults to FALSE.
+   * @param string $copy_destination
+   *  If $copy_file is TRUE, the scheme/directory to use as the destination for the copied file.
+   *  Defaults to 'public://'.
+   * @param string $language
+   *  Default language for files created via this destination class.
+   * @param string $text_format
+   *  Default text format for files created via this destination class.
+   */
+  static public function options($source_migrations, $copy_file, $copy_destination, $language, $text_format) {
+    return compact('source_migrations', 'copy_file', 'copy_destination', 'language', 'text_format');
+  }
+
+  /**
+   * Basic initialization
+   *
+   * @param array $options
+   *  Options applied to files.
+   */
+  public function __construct(array $options = array()) {
+    if (isset($options['source_migrations'])) {
+      $this->sourceMigrations = $options['source_migrations'];
+    }
+    parent::__construct($options);
+  }
+
+  /**
+   * Called at the completion of a migration into a media destination. Rewrite
+   * <img> tags into the media module's embedded JSON references.
+   */
+  public function postImport() {
+    migrate_instrument_start('MigrateDestinationMedia postImport');
+    // Scan the destination nodes
+    foreach ($this->sourceMigrations as $source_migration) {
+      $migration = MigrationBase::getInstance($source_migration);
+      $map = $migration->getMap();
+      foreach ($map as $map_row) {
+        $nid = $map_row->destid1;
+        $node = node_load($nid);
+        $body = $node->body[LANGUAGE_NONE][0]['value'];
+        // Quickly skip any non-candidates
+        if (!strstr($body, 'img')) {
+          continue;
+        }
+        // Pass full img tags into the callback
+        $new_body = preg_replace_callback('|<img [^>]*>|i', 'migrate_media_replace_callback',
+          $body);
+        $node->body[LANGUAGE_NONE][0]['value'] = $new_body;
+        node_save($node);
+      }
+    }
+    migrate_instrument_stop('MigrateDestinationMedia postImport');
+  }
+}
+
+/**
+ * If a referenced image can be found in the files table, replace the <img> tag
+ * with a media JSON reference.
+ *
+ * @param array $matches
+ */
+function migrate_media_replace_callback(array $matches) {
+  $src_matches = array();
+  // Default to the original <img> tag
+  $result = $matches[0];
+  // Extract the src parameter
+  if (preg_match('|src="([^"]+)"|i', $matches[0], $src_matches)) {
+    $src = $src_matches[1];
+    // TODO: basename is not specific enough, we should try to match the path
+    $file = db_select('file_managed', 'f')
+            ->fields('f', array('fid'))
+            ->condition('filename', basename($src))
+            ->execute()
+            ->fetchObject();
+    if ($file) {
+      // TODO: Update file_usage?
+
+      // TODO: Anything to do about alt/title?
+      $image_info = array(
+        'type' => 'media',
+        'view_mode' => 'media_large',
+        'fid' => $file->fid,
+        'attributes' => array(
+          'alt' => '',
+          'title' => '',
+          'class' => 'media-image',
+          'typeof' => 'foaf:Image',
+          'wysiwyg' => 1,
+        ),
+      );
+      $result = '[[' . drupal_json_encode($image_info) . ']]';
+    }
+  }
+
+  return $result;
+}

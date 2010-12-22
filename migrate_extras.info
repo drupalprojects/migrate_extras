@@ -5,5 +5,6 @@ core = 7.x
 package=Development
 
 dependencies[] = migrate
+files[] = media.migrate.inc
 files[] = pathauto.migrate.inc
 files[] = rules.migrate.inc
