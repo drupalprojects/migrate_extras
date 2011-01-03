@@ -89,7 +89,7 @@ function migrate_media_replace_callback(array $matches) {
   // Default to the original <img> tag
   $result = $matches[0];
   // Extract the src parameter
-  if (preg_match('|src="([^"]+)"|i', $matches[0], $src_matches)) {
+  if (preg_match('|src=[\'"]([^\'"]+)[\'"]|i', $matches[0], $src_matches)) {
     $src = $src_matches[1];
     // TODO: basename is not specific enough, we should try to match the path
     $file = db_select('file_managed', 'f')
