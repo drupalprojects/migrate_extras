@@ -86,7 +86,7 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
           continue;
         }
         // Pass full img tags into the callback
-        $new_body = preg_replace_callback('|<img [^>]*>|i', 'migrate_media_replace_callback',
+        $new_body = preg_replace_callback('|<img [^>]*>|i', array($this, 'replaceCallback'),
           $body);
         $node->body[LANGUAGE_NONE][0]['value'] = $new_body;
         node_save($node);
@@ -94,46 +94,46 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
     }
     migrate_instrument_stop('MigrateDestinationMedia postImport');
   }
-}
 
-/**
- * If a referenced image can be found in the files table, replace the <img> tag
- * with a media JSON reference.
- *
- * @param array $matches
- */
-function migrate_media_replace_callback(array $matches) {
-  $src_matches = array();
-  // Default to the original <img> tag
-  $result = $matches[0];
-  // Extract the src parameter
-  if (preg_match('|src=[\'"]([^\'"]+)[\'"]|i', $matches[0], $src_matches)) {
-    $src = $src_matches[1];
-    // TODO: basename is not specific enough, we should try to match the path
-    $file = db_select('file_managed', 'f')
-            ->fields('f', array('fid'))
-            ->condition('filename', basename($src))
-            ->execute()
-            ->fetchObject();
-    if ($file) {
-      // TODO: Update file_usage?
+  /**
+   * If a referenced image can be found in the files table, replace the <img> tag
+   * with a media JSON reference.
+   *
+   * @param array $matches
+   */
+  protected function replaceCallback(array $matches) {
+    $src_matches = array();
+    // Default to the original <img> tag
+    $result = $matches[0];
+    // Extract the src parameter
+    if (preg_match('|src=[\'"]([^\'"]+)[\'"]|i', $matches[0], $src_matches)) {
+      // Replace the scheme and host portions of the referenced URL with the
+      // Drupal scheme as it's saved in the file_unmanaged table
+      $src = preg_replace('|^https?://[^/]+/|', $this->copyDestination, $src_matches[1]);
+      $file = db_select('file_managed', 'f')
+              ->fields('f', array('fid'))
+              ->condition('filename', basename($src))
+              ->execute()
+              ->fetchObject();
+      if ($file) {
+        // TODO: Update file_usage?
 
-      // TODO: Anything to do about alt/title?
-      $image_info = array(
-        'type' => 'media',
-        'view_mode' => 'media_large',
-        'fid' => $file->fid,
-        'attributes' => array(
-          'alt' => '',
-          'title' => '',
-          'class' => 'media-image',
-          'typeof' => 'foaf:Image',
-          'wysiwyg' => 1,
-        ),
-      );
-      $result = '[[' . drupal_json_encode($image_info) . ']]';
+        // TODO: Anything to do about alt/title?
+        $image_info = array(
+          'type' => 'media',
+          'view_mode' => 'media_large',
+          'fid' => $file->fid,
+          'attributes' => array(
+            'alt' => '',
+            'title' => '',
+            'class' => 'media-image',
+            'typeof' => 'foaf:Image',
+            'wysiwyg' => 1,
+          ),
+        );
+        $result = '[[' . drupal_json_encode($image_info) . ']]';
+      }
     }
+    return $result;
   }
-
-  return $result;
 }
