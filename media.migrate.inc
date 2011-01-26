@@ -42,11 +42,29 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
    * @param array $options
    *  Options applied to files.
    */
-  public function __construct(array $options = array()) {
+  public function __construct($media_type = 'default', array $options = array()) {
     if (isset($options['source_migrations'])) {
       $this->sourceMigrations = $options['source_migrations'];
     }
     parent::__construct($options);
+    $this->entityType = 'media';
+    $this->bundle = $media_type;
+  }
+
+  /**
+   * Returns a list of fields available to be mapped for the entity type (bundle)
+   *
+   * @return array
+   *  Keys: machine names of the fields (to be passed to addFieldMapping)
+   *  Values: Human-friendly descriptions of the fields.
+   */
+  public function fields() {
+    // First get the file fields
+    $fields = parent::fields();
+
+    $fields += migrate_handler_invoke_all('Media', 'fields');
+
+    return $fields;
   }
 
   /**
