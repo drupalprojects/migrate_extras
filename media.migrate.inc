@@ -18,6 +18,13 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
   protected $sourceMigrations = array();
 
   /**
+   * Node ID of the node whose body is currently being rewritten.
+   *
+   * @var int
+   */
+  protected $parentNid;
+
+  /**
    * Return an options array for media destinations.
    *
    * @param array $source_migrations
@@ -78,8 +85,8 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
       $migration = MigrationBase::getInstance($source_migration);
       $map = $migration->getMap();
       foreach ($map as $map_row) {
-        $nid = $map_row->destid1;
-        $node = node_load($nid);
+        $this->parentNid = $map_row->destid1;
+        $node = node_load($this->parentNid);
         $body = $node->body[LANGUAGE_NONE][0]['value'];
         // Quickly skip any non-candidates
         if (!strstr($body, 'img')) {
@@ -116,7 +123,8 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
               ->execute()
               ->fetchObject();
       if ($file) {
-        // TODO: Update file_usage?
+        // Update file_usage
+        file_usage_add($file, 'migrate_extras', 'node', $this->parentNid);
 
         // TODO: Anything to do about alt/title?
         $image_info = array(
