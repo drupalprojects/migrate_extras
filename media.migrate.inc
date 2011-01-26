@@ -124,7 +124,9 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
               ->fetchObject();
       if ($file) {
         // Update file_usage
-        file_usage_add($file, 'migrate_extras', 'node', $this->parentNid);
+        // TODO: Usages not cleaned up on node_delete() - file_field_delete_file only
+        // decrements if file status is 0 (not permanent)
+        //file_usage_add($file, 'file', 'node', $this->parentNid);
 
         // TODO: Anything to do about alt/title?
         $image_info = array(
