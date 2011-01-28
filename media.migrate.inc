@@ -75,6 +75,21 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
   }
 
   /**
+   * The file import method calls file_save(), which invokes media hooks but does
+   * not call media_save(), thus fields are not saved. So, we do the media_save()
+   * ourselves after file_save().
+   *
+   * @param $file
+   *  File object to build. This is the complete object after saving.
+   * @param $source_row
+   *  Raw source data object - passed through to complete handlers.
+   */
+  public function complete(stdClass $file, stdClass $source_row) {
+    parent::complete($file, $source_row);
+    media_save($file);
+  }
+
+  /**
    * Called at the completion of a migration into a media destination. Rewrite
    * <img> tags into the media module's embedded JSON references.
    */
@@ -123,11 +138,6 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
               ->execute()
               ->fetchObject();
       if ($file) {
-        // Update file_usage
-        // TODO: Usages not cleaned up on node_delete() - file_field_delete_file only
-        // decrements if file status is 0 (not permanent)
-        //file_usage_add($file, 'file', 'node', $this->parentNid);
-
         // TODO: Anything to do about alt/title?
         $image_info = array(
           'type' => 'media',
