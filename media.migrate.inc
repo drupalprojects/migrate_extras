@@ -138,6 +138,10 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
               ->execute()
               ->fetchObject();
       if ($file) {
+        // Update file_usage
+        // Note: Usages not cleaned up on file_delete() - NYI in media module
+        file_usage_add($file, 'media', 'node', $this->parentNid);
+
         // TODO: Anything to do about alt/title?
         $image_info = array(
           'type' => 'media',
