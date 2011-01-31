@@ -39,8 +39,8 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
    * @param string $text_format
    *  Default text format for files created via this destination class.
    */
-  static public function options($source_migrations, $copy_file, $copy_destination, $language, $text_format) {
-    return compact('source_migrations', 'copy_file', 'copy_destination', 'language', 'text_format');
+  static public function options($copy_file, $copy_destination, $language, $text_format, $source_migrations = array()) {
+    return compact('copy_file', 'copy_destination', 'language', 'text_format', 'source_migrations');
   }
 
   /**
