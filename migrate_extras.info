@@ -6,7 +6,6 @@ package=Development
 
 dependencies[] = migrate
 files[] = og.migrate.inc
-files[] = filefield.migrate.inc
 files[] = nodewords.migrate.inc
 files[] = page_title.migrate.inc
 files[] = pathauto.migrate.inc
