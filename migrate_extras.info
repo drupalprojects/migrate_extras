@@ -1,4 +1,3 @@
-; $Id$
 name = Migrate Extras
 description = "Adds migrate module integration with contrib modules and other miscellaneous tweaks."
 core = 6.x
