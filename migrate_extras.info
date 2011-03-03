@@ -4,17 +4,11 @@ core = 6.x
 package=Development
 
 dependencies[] = migrate
-files[] = og.migrate.inc
+files[] = flag.inc
 files[] = nodewords.migrate.inc
+files[] = og.migrate.inc
 files[] = page_title.migrate.inc
 files[] = pathauto.migrate.inc
-files[] = uuid.migrate.inc
-files[] = user_relationships.migrate.inc
-files[] = flag.inc
 files[] = rules.migrate.inc
-
-; The following contrib modules are not yet supported with Migrate 2.0
-;files[] = content_profile.migrate.inc
-;files[] = email_registration.migrate.inc
-;files[] = location.migrate.inc
-;files[] = privatemsg.migrate.inc
+files[] = user_relationships.migrate.inc
+files[] = uuid.migrate.inc
