@@ -27,9 +27,6 @@ class MigrateDestinationOGMembership extends MigrateDestination {
 
   /**
    * Delete a membership.
-   *
-   * @param $migration
-   *  Controlling migration object. Unused here.
    * @param $id
    *  ID to be deleted.
    */
