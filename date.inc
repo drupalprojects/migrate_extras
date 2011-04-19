@@ -5,7 +5,7 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
     $this->registerTypes(array('date', 'datestamp', 'datetime'));
   }
 
-  public function prepare(stdClass $entity, array $instance, array $values) {
+  public function prepare($entity, array $instance, array $values) {
     // Setup the standard Field API array for saving.
     $delta = 0;
     foreach ($values as $value) {

@@ -35,7 +35,7 @@ class MigrateNodewordsNodeHandler extends MigrateDestinationHandler {
    * Move the nodewords fields into the appropriate structure for the nodewords
    * module to handle them on update/insert.
    */
-  public function prepare(stdClass $node, stdClass $row) {
+  public function prepare($node, stdClass $row) {
     if (module_exists('nodewords')) {
       foreach ($this->fields() as $full_field => $label) {
         if (isset($node->$full_field)) {
