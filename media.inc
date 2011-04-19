@@ -83,7 +83,7 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
    * @param $source_row
    *  Raw source data object - passed through to complete handlers.
    */
-  public function complete(stdClass $file, stdClass $source_row) {
+  public function complete($file, stdClass $source_row) {
     parent::complete($file, $source_row);
     media_save($file);
   }
