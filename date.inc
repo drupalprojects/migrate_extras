@@ -6,6 +6,13 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
   }
 
   public function prepare($entity, array $field_info, array $instance, array $values) {
+    if (isset($values['arguments'])) {
+      $arguments = $values['arguments'];
+      unset($values['arguments']);
+    }
+    else {
+      $arguments = array();
+    }
     $language = $this->getFieldLanguage($entity, $field_info, $arguments);
 
     // Setup the standard Field API array for saving.
@@ -14,15 +21,15 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
       // Work from a timestamp
       $timestamp = MigrationBase::timestamp($value);
       // What does the destination field expect?
-      if ($instance['type'] == 'datestamp') {
+      if ($instance['widget']['type'] == 'datestamp') {
         // UNIX timestamp
         $value = $timestamp;
       }
-      elseif ($instance['type'] == 'datetime') {
+      elseif ($instance['widget']['type'] == 'datetime') {
         // YYYY-MM-DD HH:MM:SS - prevent timezone application
         $value = format_date($timestamp, 'custom', 'Y-m-d H:i', 0);
       }
-      elseif ($instance['type'] == 'date') {
+      elseif ($instance['widget']['type'] == 'date') {
         // ISO date: YYYY-MM-DDTHH:MM:SS - prevent timezone application
         $value = format_date($timestamp, 'custom', 'Y-m-dTH:i', 0);
       }
