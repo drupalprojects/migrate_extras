@@ -1,10 +1,43 @@
 <?php
 
+/**
+ * @file
+ * Support for migration into Date fields.
+ */
+
 class MigrateDateFieldHandler extends MigrateFieldHandler {
   public function __construct() {
     $this->registerTypes(array('date', 'datestamp', 'datetime'));
   }
 
+  /*
+   * Arguments for a date field migration.
+   *
+   * @param timezone
+   *   Timezone (such as UTC, America/New_York, etc.) to apply.
+   * @param to
+   *   The To date of a date range
+   * @param rrule
+   *   Rule string for a repeating date field.
+   * @param language
+   *   Language of the text (defaults to destination language)
+   */
+  static function arguments($timezone = 'UTC', $to = NULL, $rrule = NULL, $language = NULL) {
+    return get_defined_vars();
+  }
+
+  /**
+   * Convert incoming data into the proper field arrays for Date fields.
+   *
+   * @param $entity
+   *  The destination entity which will hold the field arrays.
+   * @param array $field_info
+   *  Metadata for the date field being populated.
+   * @param array $instance
+   *  Metadata for this instance of the date field being populated.
+   * @param array $values
+   *  Array of date values to be fielded.
+   */
   public function prepare($entity, array $field_info, array $instance, array $values) {
     if (isset($values['arguments'])) {
       $arguments = $values['arguments'];
@@ -13,31 +46,71 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
     else {
       $arguments = array();
     }
+    if (isset($arguments['timezone'])) {
+      $timezone = $arguments['timezone'];
+    }
+    else {
+      $timezone = 'UTC';
+    }
+    if (isset($arguments['to'])) {
+      $value2 = $arguments['to'];
+    }
+    else {
+      $value2 = NULL;
+    }
+    if (isset($arguments['rrule'])) {
+      $rrule = $arguments['rrule'];
+    }
+    else {
+      $rrule = NULL;
+    }
     $language = $this->getFieldLanguage($entity, $field_info, $arguments);
 
     // Setup the standard Field API array for saving.
     $delta = 0;
     foreach ($values as $value) {
       // Work from a timestamp
-      $timestamp = MigrationBase::timestamp($value);
-      // What does the destination field expect?
-      if ($instance['widget']['type'] == 'datestamp') {
-        // UNIX timestamp
-        $value = $timestamp;
-      }
-      elseif ($instance['widget']['type'] == 'datetime') {
-        // YYYY-MM-DD HH:MM:SS - prevent timezone application
-        $value = format_date($timestamp, 'custom', 'Y-m-d H:i', 0);
-      }
-      elseif ($instance['widget']['type'] == 'date') {
-        // ISO date: YYYY-MM-DDTHH:MM:SS - prevent timezone application
-        $value = format_date($timestamp, 'custom', 'Y-m-dTH:i', 0);
-      }
-      else {
-        // Should never get here
+      $value = MigrationBase::timestamp($value);
+      if ($value2) {
+        $value2 = MigrationBase::timestamp($value2);
       }
 
-      $return[$language][$delta]['value'] = $value;
+      // What does the destination field expect?
+      switch ($field_info['type']) {
+        case 'datestamp':
+          // Already done
+          break;
+        case 'datetime':
+          // YYYY-MM-DD HH:MM:SS
+          $value = format_date($value, 'custom', 'Y-m-d H:i', $timezone);
+          if ($value2) {
+            $value2 = format_date($value2, 'custom', 'Y-m-d H:i', $timezone);
+          }
+          break;
+        case 'date':
+          // ISO date: YYYY-MM-DDTHH:MM:SS
+          $value = format_date($value, 'custom', 'Y-m-d\TH:i', $timezone);
+          if ($value2) {
+            $value2 = format_date($value2, 'custom', 'Y-m-d\TH:i', $timezone);
+          }
+          break;
+        default:
+          break;
+      }
+
+      // Handle repeats, coming in as RRULEs. Many field instances may be created.
+      if ($instance['widget']['type'] == 'date_text_repeat' && $rrule) {
+        include_once(DRUPAL_ROOT . '/' . drupal_get_path('module', 'date') . '/date_repeat.inc');
+        include_once(DRUPAL_ROOT . '/' . drupal_get_path('module', 'date_api') . '/date_api_ical.inc');
+        $item = array('value' => $value, 'value2' => $value2, 'timezone' => $timezone);
+        // Can be de-uglified when http://drupal.org/node/1159404 is committed.
+        $return[$language] = date_repeat_build_dates(NULL, date_ical_parse_rrule(NULL, $rrule),
+          $field_info, $item);
+      }
+      else {
+        $return[$language][$delta]['value'] = $value;
+        $return[$language][$delta]['value2'] = $value2;
+      }
       $delta++;
     }
     if (!isset($return)) {
