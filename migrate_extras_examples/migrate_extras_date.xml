@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source_data>
+  <item>
+    <id>3</id>
+    <title>Simple example</title>
+    <body>This is pretty straight-forward.</body>
+    <date>05/12/2011 19:43</date>
+    <date_range>
+      <from>06/13/2011 6:32pm</from>
+      <to>07/23/2011 10:32am</to>
+    </date_range>
+    <datestamp>07/22/2011 12:13</datestamp>
+    <datestamp_range>
+      <from>8/1/2011 00:00</from>
+      <to>9/1/2011 00:00</to>
+    </datestamp_range>
+    <datetime>11/18/2011 06:00</datetime>
+    <datetime_range>
+      <from>10/30/2011 19:43</from>
+      <to>12/31/2011 23:59</to>
+      <timezone>America/Chicago</timezone>
+    </datetime_range>
+    <date_repeat>
+      <date>11/25/2011 9:01</date>
+      <rule>RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=20120512T040000Z;WKST=MO
+EXDATE:20111223</rule>
+    </date_repeat>
+  </item>
+</source_data>
