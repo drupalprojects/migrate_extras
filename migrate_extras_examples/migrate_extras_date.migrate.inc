@@ -91,13 +91,25 @@ class MigrateExampleDateMigration extends XMLMigration {
          ->arguments(array('to' => array('source_field' => 'datestamp_range_to')));
     $this->addFieldMapping(NULL, 'datestamp_range_to')
          ->xpath('datestamp_range/to');
+
+    // You can specify a timezone to be applied to all values going into the field
+    // (Tokyo is UTC+9, no DST)
+    $arguments = MigrateDateFieldHandler::arguments('Asia/Tokyo');
     $this->addFieldMapping('field_datetime', 'datetime')
-         ->xpath('datetime');
+         ->xpath('datetime')
+         ->arguments($arguments);
+
+    // You can also get the timezone from the source data - it can be different
+    // for each instance of the field
+    $arguments = MigrateDateFieldHandler::arguments(array('source_field' => 'datetime_range_zone'),
+      array('source_field' => 'datetime_range_to'));
     $this->addFieldMapping('field_datetime_range', 'datetime_range')
          ->xpath('datetime_range/from')
-         ->arguments(array('to' => array('source_field' => 'datetime_range_to')));
+         ->arguments($arguments);
     $this->addFieldMapping(NULL, 'datetime_range_to')
          ->xpath('datetime_range/to');
+    $this->addFieldMapping(NULL, 'datetime_range_zone')
+         ->xpath('datetime_range/timezone');
 
     // No unmapped source fields
 

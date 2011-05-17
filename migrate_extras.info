@@ -8,3 +8,4 @@ files[] = date.inc
 files[] = media.inc
 files[] = pathauto.inc
 files[] = rules.inc
+files[] = tests/date.test
