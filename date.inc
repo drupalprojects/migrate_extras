@@ -15,14 +15,14 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
    *
    * @param timezone
    *   Timezone (such as UTC, America/New_York, etc.) to apply.
-   * @param to
-   *   The To date of a date range
+   * @param timezone_db
+   *   Timezone_db value for the field.
    * @param rrule
    *   Rule string for a repeating date field.
    * @param language
    *   Language of the text (defaults to destination language)
    */
-  static function arguments($timezone = 'UTC', $to = NULL, $rrule = NULL, $language = NULL) {
+  static function arguments($timezone = 'UTC', $timezone_db = 'UTC', $rrule = NULL, $language = NULL) {
     return get_defined_vars();
   }
 
@@ -46,33 +46,59 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
     else {
       $arguments = array();
     }
+
     if (isset($arguments['timezone'])) {
-      $timezone = $arguments['timezone'];
+      $default_timezone = $arguments['timezone'];
     }
     else {
-      $timezone = 'UTC';
+      $default_timezone = 'UTC';
     }
-    if (isset($arguments['to'])) {
-      $value2 = $arguments['to'];
+    if (isset($arguments['timezone_db'])) {
+      $default_timezone_db = $arguments['timezone_db'];
     }
     else {
-      $value2 = NULL;
+      $default_timezone_db = NULL;
     }
     if (isset($arguments['rrule'])) {
-      $rrule = $arguments['rrule'];
+      $default_rrule = $arguments['rrule'];
     }
     else {
-      $rrule = NULL;
+      $default_rrule = NULL;
     }
     $language = $this->getFieldLanguage($entity, $field_info, $arguments);
 
     // Setup the standard Field API array for saving.
     $delta = 0;
-    foreach ($values as $value) {
+    foreach ($values as $from) {
+      // Set defaults
+      $to = NULL;
+      $timezone = $default_timezone;
+      $timezone_db = $default_timezone_db;
+      $rrule = $default_rrule;
+
+      // Is the value a straight datetime value, or JSON containing a set of properties?
+      if ($from{0} == '{') {
+        $properties = drupal_json_decode($from);
+        $from = $properties['from'];
+        // Properties passed in with the date override any set via arguments
+        if (!empty($properties['to'])) {
+          $to = $properties['to'];
+        }
+        if (!empty($properties['timezone'])) {
+          $timezone = $properties['timezone'];
+        }
+        if (!empty($properties['timezone_db'])) {
+          $timezone_db = $properties['timezone_db'];
+        }
+        if (!empty($properties['rrule'])) {
+          $rrule = $properties['rrule'];
+        }
+      }
+
       // Work from a timestamp
-      $value = MigrationBase::timestamp($value);
-      if ($value2) {
-        $value2 = MigrationBase::timestamp($value2);
+      $from = MigrationBase::timestamp($from);
+      if ($to) {
+        $to = MigrationBase::timestamp($to);
       }
 
       // What does the destination field expect?
@@ -82,16 +108,16 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
           break;
         case 'datetime':
           // YYYY-MM-DD HH:MM:SS
-          $value = format_date($value, 'custom', 'Y-m-d H:i', $timezone);
-          if ($value2) {
-            $value2 = format_date($value2, 'custom', 'Y-m-d H:i', $timezone);
+          $from = format_date($from, 'custom', 'Y-m-d H:i', $timezone);
+          if ($to) {
+            $to = format_date($to, 'custom', 'Y-m-d H:i', $timezone);
           }
           break;
         case 'date':
           // ISO date: YYYY-MM-DDTHH:MM:SS
-          $value = format_date($value, 'custom', 'Y-m-d\TH:i', $timezone);
-          if ($value2) {
-            $value2 = format_date($value2, 'custom', 'Y-m-d\TH:i', $timezone);
+          $from = format_date($from, 'custom', 'Y-m-d\TH:i', $timezone);
+          if ($to) {
+            $to = format_date($to, 'custom', 'Y-m-d\TH:i', $timezone);
           }
           break;
         default:
@@ -102,14 +128,16 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
       if ($instance['widget']['type'] == 'date_text_repeat' && $rrule) {
         include_once(DRUPAL_ROOT . '/' . drupal_get_path('module', 'date') . '/date_repeat.inc');
         include_once(DRUPAL_ROOT . '/' . drupal_get_path('module', 'date_api') . '/date_api_ical.inc');
-        $item = array('value' => $value, 'value2' => $value2, 'timezone' => $timezone);
+        $item = array('value' => $from, 'value2' => $to, 'timezone' => $timezone);
         // Can be de-uglified when http://drupal.org/node/1159404 is committed.
-        $return[$language] = date_repeat_build_dates(NULL, date_ical_parse_rrule(NULL, $rrule),
+        $return[$language] = date_repeat_build_dates(NULL, date_ical_parse_rrule($field_info, $rrule),
           $field_info, $item);
       }
       else {
-        $return[$language][$delta]['value'] = $value;
-        $return[$language][$delta]['value2'] = $value2;
+        $return[$language][$delta]['value'] = $from;
+        if (!empty($to)) {
+          $return[$language][$delta]['value2'] = $to;
+        }
       }
       $delta++;
     }

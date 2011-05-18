@@ -82,7 +82,7 @@ function migrate_extras_date_field_default_fields() {
   $fields['node-migrate_example_date-field_date'] = array(
     'field_config' => array(
       'active' => '1',
-      'cardinality' => '1',
+      'cardinality' => '-1',
       'deleted' => '0',
       'entity_types' => array(),
       'field_name' => 'field_date',
@@ -165,7 +165,7 @@ function migrate_extras_date_field_default_fields() {
   $fields['node-migrate_example_date-field_date_range'] = array(
     'field_config' => array(
       'active' => '1',
-      'cardinality' => '1',
+      'cardinality' => '-1',
       'deleted' => '0',
       'entity_types' => array(),
       'field_name' => 'field_date_range',
@@ -432,7 +432,7 @@ function migrate_extras_date_field_default_fields() {
         ),
         'repeat' => 0,
         'timezone_db' => 'UTC',
-        'todate' => 'required',
+        'todate' => 'optional',
         'tz_handling' => 'site',
       ),
       'translatable' => '1',
