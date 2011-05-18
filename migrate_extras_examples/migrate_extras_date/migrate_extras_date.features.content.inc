@@ -31,7 +31,7 @@ function migrate_extras_date_content_default_fields() {
     'widget_active' => '1',
     'type' => 'date',
     'required' => '0',
-    'multiple' => '0',
+    'multiple' => '1',
     'module' => 'date',
     'active' => '1',
     'granularity' => array(
@@ -91,7 +91,7 @@ function migrate_extras_date_content_default_fields() {
     'widget_active' => '1',
     'type' => 'date',
     'required' => '0',
-    'multiple' => '0',
+    'multiple' => '1',
     'module' => 'date',
     'active' => '1',
     'granularity' => array(

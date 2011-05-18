@@ -30,16 +30,12 @@ class MigrateExampleDateMigration extends XMLMigration {
       'title' => t('Title'),
       'body' => t('Description'),
       'date' => t('A simple date'),
-      'date_range' => t('Start value for a date range'),
-      'date_range_to' => t('End value for a date range'),
+      'date_range_from' => t('Start value for a date range'),
       'datestamp' => t('Simple datestamp'),
-      'datestamp_range' => t('Start value for a datestamp range'),
-      'datestamp_range_to' => t('End value for a datestamp range'),
+      'datestamp_range_from' => t('Start value for a datestamp range'),
       'datetime' => t('Simple datetime'),
-      'datetime_range' => t('Start value for a datetime range'),
-      'datetime_range_to' => t('End value for a datetime range'),
+      'datetime_range_from' => t('Start value for a datetime range'),
       'date_repeat' => t('Sample of a repeating date field'),
-      'rrule' => t('Repeat rule to be used for date_repeat'),
     );
 
     // Our test data is in an XML file
@@ -61,36 +57,19 @@ class MigrateExampleDateMigration extends XMLMigration {
 
     // Date field mappings
 
-    // Simple fields, we just need the xpath
+    // For simple date fields, we just need the xpath
     $this->addFieldMapping('field_date', 'date')
          ->xpath('date');
 
-    // For date ranges, we use a "to" argument to tell it what source field holds
-    // the end date
-    $this->addFieldMapping('field_date_range', 'date_range')
-         ->xpath('date_range/from')
-         ->arguments(array('to' => array('source_field' => 'date_range_to')));
-    // We add a NULL mapping which holds the xpath. With a SQL source, this would
-    // not be necessary - just by having the To value in the query it would be
-    // available to the argument above.
-    $this->addFieldMapping(NULL, 'date_range_to')
-         ->xpath('date_range/to');
+    // For date ranges, we add the "to" value in prepareRow() below
+    $this->addFieldMapping('field_date_range', 'date_range_from');
 
-    // For RRULEs on repeating date fields, we do much the same as we did for the To.
-    $arguments = MigrateDateFieldHandler::arguments('UTC', NULL, array('source_field' => 'rrule'));
-    $this->addFieldMapping('field_date_repeat', 'date_repeat')
-         ->xpath('date_repeat/date')
-         ->arguments($arguments);
-    $this->addFieldMapping(NULL, 'rrule')
-         ->xpath('date_repeat/rule');
+    // RRULEs on repeat fields are also done in prepareRow()
+    $this->addFieldMapping('field_date_repeat', 'date_repeat');
 
     $this->addFieldMapping('field_datestamp', 'datestamp')
          ->xpath('datestamp');
-    $this->addFieldMapping('field_datestamp_range', 'datestamp_range')
-         ->xpath('datestamp_range/from')
-         ->arguments(array('to' => array('source_field' => 'datestamp_range_to')));
-    $this->addFieldMapping(NULL, 'datestamp_range_to')
-         ->xpath('datestamp_range/to');
+    $this->addFieldMapping('field_datestamp_range', 'datestamp_range_from');
 
     // You can specify a timezone to be applied to all values going into the field
     // (Tokyo is UTC+9, no DST)
@@ -100,21 +79,49 @@ class MigrateExampleDateMigration extends XMLMigration {
          ->arguments($arguments);
 
     // You can also get the timezone from the source data - it can be different
-    // for each instance of the field
-    $arguments = MigrateDateFieldHandler::arguments(array('source_field' => 'datetime_range_zone'),
-      array('source_field' => 'datetime_range_to'));
-    $this->addFieldMapping('field_datetime_range', 'datetime_range')
-         ->xpath('datetime_range/from')
-         ->arguments($arguments);
-    $this->addFieldMapping(NULL, 'datetime_range_to')
-         ->xpath('datetime_range/to');
-    $this->addFieldMapping(NULL, 'datetime_range_zone')
-         ->xpath('datetime_range/timezone');
+    // for each instance of the field. Like To and RRULE values, it is added
+    // in prepareRow().
+    $this->addFieldMapping('field_datetime_range', 'datetime_range_from');
 
     // No unmapped source fields
 
     // Unmapped destination fields
     $this->addUnmigratedDestinations(array('teaser', 'status', 'promote',
       'revision', 'language', 'sticky', 'created', 'changed', 'revision_uid'));
+  }
+
+  public function prepareRow($current_row) {
+    // An advanced feature of the date field handler is that in addition to the
+    // basic (from) date itself, we can add additional properties like timezone,
+    // encapsulating them as JSON.
+
+    // The date range field can have multiple values
+    $current_row->date_range_from = array();
+    foreach ($current_row->xml->date_range as $range) {
+      $date_data = array(
+        'from' => (string)$range->from[0],
+        'to' => (string)$range->to[0],
+      );
+      $current_row->date_range_from[] = drupal_to_js($date_data);
+    }
+
+    $date_data = array(
+      'from' => (string)$current_row->xml->datestamp_range->from[0],
+      'to' => (string)$current_row->xml->datestamp_range->to[0],
+    );
+    $current_row->datestamp_range_from = drupal_to_js($date_data);
+
+    $date_data = array(
+      'from' => (string)$current_row->xml->datetime_range->from[0],
+      'to' => (string)$current_row->xml->datetime_range->to[0],
+      'timezone' => (string)$current_row->xml->datetime_range->timezone[0],
+    );
+    $current_row->datetime_range_from = drupal_to_js($date_data);
+
+    $date_data = array(
+      'from' => (string)$current_row->xml->date_repeat->date[0],
+      'rrule' => (string)$current_row->xml->date_repeat->rule[0],
+    );
+    $current_row->date_repeat = drupal_to_js($date_data);
   }
 }
