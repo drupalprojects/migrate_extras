@@ -14,3 +14,4 @@ files[] = rules.inc
 files[] = user_relationships.inc
 files[] = uuid.inc
 files[] = tests/date.test
+files[] = tests/pathauto.test

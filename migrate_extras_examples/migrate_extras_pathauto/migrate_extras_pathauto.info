@@ -1,0 +1,10 @@
+core = "6.x"
+dependencies[] = "migrate_extras"
+dependencies[] = "pathauto"
+description = "Examples of migrating with the Pathauto module"
+features[node][] = "migrate_example_pathauto"
+files[] = migrate_extras_pathauto.migrate.inc
+name = "Migrate Extras Pathauto Example"
+package = "Features"
+project = "migrate_extras_pathauto"
+version = "6.x-2.1-beta1"
