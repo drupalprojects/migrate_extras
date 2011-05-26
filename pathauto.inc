@@ -18,8 +18,18 @@ class MigratePathautoHandler extends MigrateDestinationHandler {
    */
   public function fields() {
     return array(
-      'pathauto_perform_alias' =>
+      'pathauto' =>
         t('Pathauto: Perform aliasing (set to 0 to prevent alias generation during migration'),
     );
+  }
+
+  public function prepare($entity, stdClass $row) {
+    if (isset($entity->pathauto)) {
+      if (!isset($entity->path)) {
+        $entity->path = array();
+      }
+      $entity->path['pathauto'] = $entity->pathauto;
+      unset($entity->pathauto);
+    }
   }
 }
