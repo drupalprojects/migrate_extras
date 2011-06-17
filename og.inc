@@ -15,7 +15,7 @@ class MigrateDestinationOGMembership extends MigrateDestination {
     $roles = array_flip(og_get_global_roles());
     $this->rid = $roles[OG_ADMINISTRATOR_ROLE];
   }
-  
+
   static public function getKeySchema() {
     return array(
       'gid' => array(
@@ -60,17 +60,17 @@ class MigrateDestinationOGMembership extends MigrateDestination {
     if (empty($entity->uid)) {
       throw new MigrateException('Missing $entity->uid');
     }
-    
+
     // Slow, but is required by OG API - og_group().
     $account = user_load($entity->uid);
-    
+
     $values = array(
         'entity' => $account,
         'state' => isset($entity->state) ? $entity->state : OG_STATE_ACTIVE, // Other state is OG_STATE_PENDING
         'created' => isset($entity->created) ? $entity->created : REQUEST_TIME,
     );
     og_group($entity->gid, $values);
-    
+
     if ($entity->is_admin) {
       og_role_grant($entity->gid, $entity->uid, $this->rid);
     }
@@ -88,5 +88,35 @@ class MigrateDestinationOGMembership extends MigrateDestination {
         'created' => 'Create date for this membership. Defaults to REQUEST_TIME',
     );
   }
+}
 
+class MigrateGroupFieldHandler extends MigrateFieldHandler {
+  public function __construct() {
+    $this->registerTypes(array('group'));
+  }
+
+  public function prepare($entity, array $field_info, array $instance, array $values) {
+    $migration = Migration::currentMigration();
+    if (isset($values['arguments'])) {
+      $arguments = $values['arguments'];
+      unset($values['arguments']);
+    }
+    else {
+      $arguments = array();
+    }
+
+    $language = $this->getFieldLanguage($entity, $field_info, $arguments);
+
+    // Setup the standard Field API array for saving.
+    $delta = 0;
+    $return = array();
+    foreach ($values as $value) {
+      // Don't save empty references
+      if ($value) {
+        $return[$language][$delta]['gid'] = $value;
+        $delta++;
+      }
+    }
+    return $return;
+  }
 }
