@@ -9,6 +9,7 @@ files[] = media.inc
 files[] = pathauto.inc
 files[] = rules.inc
 files[] = og.inc
+files[] = votingapi.inc
 files[] = user_relationships.inc
 files[] = tests/date.test
 files[] = tests/pathauto.test
