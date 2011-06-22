@@ -29,6 +29,9 @@ class MigratePathautoHandler extends MigrateDestinationHandler {
         $entity->path = array();
       }
       $entity->path['pathauto'] = $entity->pathauto;
+      if (!isset($entity->path['alias'])) {
+        $entity->path['alias'] = '';
+      }
       unset($entity->pathauto);
     }
   }
