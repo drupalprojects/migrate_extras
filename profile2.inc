@@ -107,10 +107,12 @@ class MigrateDestinationProfile2 extends MigrateDestinationEntity {
    *  successful. FALSE on failure.
    */
   public function import(stdClass $entity, stdClass $row) {
-    // Updating previously-migrated content?
     $migration = Migration::currentMigration();
+    $type = $this->entity_info['entity keys']['bundle'];
+    $entity->$type = $this->bundle;
     list($id, $vid, $bundle) = entity_extract_ids($this->entity_type, $entity);
 
+    // Updating previously-migrated content?
     if (isset($row->migrate_map_destid1)) {
       // Make sure is_new is off
       $entity->is_new = FALSE;
@@ -142,11 +144,6 @@ class MigrateDestinationProfile2 extends MigrateDestinationEntity {
         $entity->uid = $old_entity->uid;
       }
     }
-
-    // Set some required properties.
-    // Set type before invoking prepare handlers - they may take type-dependent actions.
-    $type = $this->entity_info['entity keys']['bundle'];
-    $entity->$type = $this->bundle;
 
     if ($migration->getSystemOfRecord() == Migration::SOURCE) {
       if (!isset($entity->language)) {
