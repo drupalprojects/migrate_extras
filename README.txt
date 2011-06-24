@@ -15,6 +15,7 @@ The following modules are currently supported in Migrate Extras on Drupal 6:
 
 Date
 Flag
+Formatted Number
 Nodewords
 Organic Groups
 Page Title
