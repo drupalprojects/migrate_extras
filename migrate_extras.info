@@ -6,6 +6,7 @@ package=Development
 dependencies[] = migrate
 files[] = date.inc
 files[] = flag.inc
+files[] = formatted_number.inc
 files[] = nodewords.inc
 files[] = og.inc
 files[] = page_title.inc
