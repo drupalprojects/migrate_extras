@@ -5,6 +5,7 @@ package=Development
 
 dependencies[] = migrate
 files[] = addressfield.inc
+files[] = entity_api.inc
 files[] = flag.inc
 files[] = media.inc
 files[] = pathauto.inc
