@@ -15,6 +15,7 @@ The extra implementation may be disabled at admin/content/migrate/configure.
 The following modules are currently supported in Migrate Extras on Drupal 7:
 
 Date
+Flag
 Media
 Organic Groups
 Pathauto
