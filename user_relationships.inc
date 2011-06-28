@@ -9,11 +9,30 @@
  * Destination class implementing migration into user_relationships table.
  */
 class MigrateDestinationUserRelationships extends MigrateDestination {
-  public function __construct($rtid) {
+  protected $typeID;
+  protected $typeName;
+
+  /**
+   * Construct a destination for the specified user relationship type. Interprets
+   * the type as a type name - if that fails, assumes it's a type ID (rtid).
+   *
+   * @param mixed $type_name
+   *  Name of a user relationship type, or its rtid.
+   */
+  public function __construct($type_name) {
     parent::__construct();
-    $this->rtid = $rtid;
+    $type = user_relationships_type_load(array('name' => $type_name));
+    if ($type) {
+      $this->typeName = $type_name;
+      $this->typeID = $type->rtid;
+    }
+    else {
+      $type = user_relationships_type_load($type_name);
+      $this->typeName = $type->name;
+      $this->typeID = $type_name;
+    }
   }
-  
+
   static public function getKeySchema() {
     return array(
       'rid' => array(
@@ -57,9 +76,9 @@ class MigrateDestinationUserRelationships extends MigrateDestination {
         $entity->$property = Migration::timestamp($entity->$property);
       }
     }
-    
-    $entity->rtid = $this->rtid;
-    
+
+    $entity->rtid = $this->typeID;
+
     $op = isset($entity->op) ? $entity->op : 'approve';
     if ($saved = user_relationships_save_relationship($entity, $op)) {
       return array($saved->rid);
