@@ -88,13 +88,17 @@ class MigrateDestinationUserRelationships extends MigrateDestination {
   public function fields() {
     return array(
         'rid' => 'Relationship ID',
-        'requester_id' => '',
-        'requestee_id' => '',
-        'approved' => '',
-        'created_at' => '',
-        'updated_at' => '',
-        'flags' => '',
+        'requester_id' => 'User ID of relationship requestor',
+        'requestee_id' => 'User ID of relationship requestee',
+        'approved' => 'Whether the requestee approved the relationship',
+        'created_at' => 'Timestamp when the relationship was created',
+        'updated_at' => 'Timestamp when the relationship was last updated',
+        'flags' => 'UR_OK (0) or UR_BANNED (1)',
         'op' => 'Default value is \'approve\'. Sent as second param to user_relationships_save_relationship().'
     );
+  }
+
+  public function __toString() {
+    return t('User relationship type: !type', array('!type' => $this->typeName));
   }
 }
