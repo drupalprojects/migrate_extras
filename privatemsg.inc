@@ -57,13 +57,19 @@ class MigrateDestinationPrivateMsg extends MigrateDestination {
     // The privatemsg API does not support updating. See http://drupal.org/node/1184984
     // $message['mid'] = $entity->mid;
 
+    // The two user_load() calls here could by slow. If so, one could experiment
+    // with entity cache module - http://drupal.org/project/entitycache.
     $options = array();
     if (isset($entity->timestamp)) $options['timestamp'] = Migration::timestamp($entity->timestamp);
-    if (isset($entity->author)) $options['author'] = $entity->author;
+    if (isset($entity->author)) $options['author'] = user_load($entity->author);
     if (isset($entity->format)) $options['format'] = $entity->format;
 
+    foreach ($entity->recipients as $uid) {
+      $entity->to[] = user_load($uid);
+    }
+
     // FYI, API is at http://api.worldempire.ch/api/privatemsg/privatemsg.module/function/privatemsg_new_thread/7-2
-    $return = privatemsg_new_thread($entity->recipients, $entity->subject, $entity->body, $options);
+    $return = privatemsg_new_thread($entity->to, $entity->subject, $entity->body, $options);
 
     if ($return['message'] !== FALSE) {
       $this->complete($return, $row);
