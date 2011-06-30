@@ -124,7 +124,6 @@ class MigrateDestinationPrivateMsg extends MigrateDestinationEntity {
       // Set the read status for the recipient (defaults to unread, so only need
       // to set if read)
       $mid = $return['message']->mid;
-      drush_print("is_new=".$entity->is_new);
       if (isset($entity->is_new) && $entity->is_new == PRIVATEMSG_READ) {
         foreach ($entity->to as $account) {
           privatemsg_message_change_status($mid, $entity->is_new, $account);
