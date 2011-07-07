@@ -5,11 +5,13 @@ package=Development
 
 dependencies[] = migrate
 files[] = date.inc
+files[] = flag.inc
 files[] = media.inc
 files[] = pathauto.inc
 files[] = profile2.inc
 files[] = rules.inc
 files[] = og.inc
+files[] = privatemsg.inc
 files[] = votingapi.inc
 files[] = user_relationships.inc
 files[] = tests/date.test
