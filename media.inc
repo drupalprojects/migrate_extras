@@ -24,7 +24,7 @@ class MigrateMediaFieldHandler extends MigrateFileFieldHandler {
    */
   protected function buildFileArray($entity, array $field_info, array $instance, $migration, $arguments, $value) {
     static $fids;
-drush_print('in media handler');
+
     // Is the value a straight path, or JSON containing a set of properties?
     if ($value{0} == '{') {
       $properties = drupal_json_decode($value);
