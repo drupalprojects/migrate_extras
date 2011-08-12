@@ -16,11 +16,11 @@ class MigrateMediaFieldHandler extends MigrateFileFieldHandler {
     foreach ($instance['widget']['settings']['allowed_schemes'] as $scheme => $value) {
       if (!empty($value)) {
         // Hard-coded hack for Youtube
-        if ($scheme == 'youtube') {
-          return $scheme . '://v';
+        if ($value == 'youtube') {
+          return $value . '://v';
         }
         else {
-          return $scheme . '://';
+          return $value . '://';
         }
       }
     }
