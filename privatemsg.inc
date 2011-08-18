@@ -120,7 +120,7 @@ class MigrateDestinationPrivateMsg extends MigrateDestinationEntity {
     $return = privatemsg_new_thread($entity->to, $entity->subject, $entity->body, $options);
 
     if (!empty($return['success'])) {
-      $this->complete($return, $row);
+      $this->complete((object)$return, $row);
       // Set the read status for the recipient (defaults to unread, so only need
       // to set if read)
       $mid = $return['message']->mid;
