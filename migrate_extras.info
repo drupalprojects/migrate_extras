@@ -14,4 +14,5 @@ files[] = og.inc
 files[] = privatemsg.inc
 files[] = votingapi.inc
 files[] = user_relationships.inc
+files[] = webform.inc
 files[] = tests/pathauto.test
