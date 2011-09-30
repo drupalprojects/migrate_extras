@@ -52,10 +52,10 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
       $default_timezone = 'UTC';
     }
     if (isset($arguments['timezone_db'])) {
-      $timezone_db = $arguments['timezone_db'];
+      $default_timezone_db = $arguments['timezone_db'];
     }
     else {
-      $timezone_db = NULL;
+      $default_timezone_db = NULL;
     }
     if (isset($arguments['rrule'])) {
       $default_rrule = $arguments['rrule'];
@@ -78,7 +78,7 @@ class MigrateDateFieldHandler extends MigrateFieldHandler {
       $rrule = $default_rrule;
 
       // Is the value a straight datetime value, or JSON containing a set of properties?
-      if ($from{0} == '{') {
+      if (!empty($from) && $from{0} == '{') {
         $properties = json_decode($from, TRUE);
         $from = $properties['from'];
         // Properties passed in with the date override any set via arguments
