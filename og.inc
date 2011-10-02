@@ -25,6 +25,10 @@ class MigrateDestinationOGMembership extends MigrateDestination {
     );
   }
 
+  public function __toString() {
+    return t('group');
+  }
+  
   /**
    * Delete a membership.
    * @param $id
