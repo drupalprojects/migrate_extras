@@ -15,6 +15,11 @@ class MigrateDestinationUserRelationships extends MigrateDestination {
     parent::__construct();
     $this->rtid = $rtid;
   }
+
+  public function __toString() {
+    $reltype = user_relationships_type_load($this->rtid);
+    return t('User relationship type: !type', array('!type' => $reltype->name));
+  }
   
   static public function getKeySchema() {
     return array(
