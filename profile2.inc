@@ -130,7 +130,7 @@ class MigrateDestinationProfile2 extends MigrateDestinationEntity {
       if (empty($id)) {
         throw new MigrateException(t('System-of-record is DESTINATION, but no destination id provided'));
       }
-      $old_entity = entity_load_single($this->entitytype, $id);
+      $old_entity = entity_load_single($this->entity_type, $id);
       if (!isset($entity->created)) {
         $entity->created = $old_entity->created;
       }
