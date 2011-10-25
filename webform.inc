@@ -229,7 +229,7 @@ class MigrateDestinationWebformSubmission extends MigrateDestination {
     migrate_instrument_start('webform_submission_update/insert');
     // Determine if it's an insert or update.
     if (empty($entity->sid)) {
-      $updating = TRUE;
+      $updating = FALSE;
       $sid = webform_submission_insert($this->node, $entity);
     }
     else {
