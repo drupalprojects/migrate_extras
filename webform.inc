@@ -131,16 +131,6 @@ class MigrateDestinationWebformSubmission extends MigrateDestination {
     // Call any general object handlers.
     migrate_handler_invoke_all('WebformSubmission', 'prepare', $entity, $source_row, $this->node);
 
-    // Move the data from our custom keys back to webform's component ids.
-    $data = array();
-    foreach ($this->component_cids as $field_name => $cid) {
-      if (isset($entity->$field_name)) {
-        $data[$cid] = $entity->$field_name;
-      }
-      unset($entity->$field_name);
-    }
-    $entity->data = webform_submission_data($this->node, $data);
-
     // Then call any prepare handler for this specific Migration.
     if (method_exists($migration, 'prepare')) {
       $migration->prepare($entity, $source_row, $this->node);
