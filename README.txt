@@ -15,6 +15,7 @@ The following modules are currently supported in Migrate Extras on Drupal 7 (not
 that Date module support has moved into the Date module itself):
 
 Address Field
+Entity API
 Flag
 Media
 Organic Groups
