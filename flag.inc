@@ -37,7 +37,8 @@ class MigrateDestinationFlagSimple extends MigrateDestination {
   public function bulkRollback(array $ids) {
     migrate_instrument_start(__METHOD__);
     db_delete('flag_content')
-      ->condition('fcid', $ids, 'IN');
+      ->condition('fcid', $ids, 'IN')
+      ->execute();
     migrate_instrument_stop(__METHOD__);
   }
 
