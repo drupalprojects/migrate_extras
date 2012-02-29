@@ -17,6 +17,7 @@ that Date module support has moved into the Date module itself):
 Address Field
 Entity API
 Flag
+Interval
 Media
 Organic Groups
 Pathauto

@@ -7,6 +7,7 @@ dependencies[] = migrate
 files[] = addressfield.inc
 files[] = entity_api.inc
 files[] = flag.inc
+files[] = interval.inc
 files[] = media.inc
 files[] = pathauto.inc
 files[] = profile2.inc
