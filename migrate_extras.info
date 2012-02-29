@@ -5,6 +5,7 @@ package=Development
 
 dependencies[] = migrate
 files[] = date.inc
+files[] = emfield.inc
 files[] = flag.inc
 files[] = formatted_number.inc
 files[] = nodewords.inc
