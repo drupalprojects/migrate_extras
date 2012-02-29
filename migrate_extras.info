@@ -5,6 +5,7 @@ package=Development
 
 dependencies[] = migrate
 files[] = addressfield.inc
+files[] = cck_phone.inc
 files[] = entity_api.inc
 files[] = flag.inc
 files[] = interval.inc

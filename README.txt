@@ -21,6 +21,7 @@ Interval
 Media
 Organic Groups
 Pathauto
+Phone Number (cck_phone)
 Private Messages
 Profile2
 Rules
