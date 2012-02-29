@@ -67,6 +67,26 @@ class MigrateDestinationFlagSimple extends MigrateDestination {
       $return = drupal_write_record('flag_content', $entity);
     }
     if ($return) {
+      // Update the flag_counts table.
+      $count = db_select('flag_content')
+        ->fields('flag_content')
+        ->condition('fid', $this->fid)
+        ->condition('content_type', $entity->content_type)
+        ->condition('content_id', $entity->content_id)
+        ->countQuery()
+        ->execute()
+        ->fetchField();
+      db_merge('flag_counts')
+        ->key(array(
+          'fid' => $this->fid,
+          'content_id' => $entity->content_id,
+        ))
+        ->fields(array(
+          'content_type' => $entity->content_type,
+          'count' => $count,
+          'last_updated' => REQUEST_TIME,
+        ))
+        ->execute();
       return array($entity->fcid);
     }
   }
