@@ -30,7 +30,7 @@ class MigrateDestinationEntityAPI extends MigrateDestinationEntity {
    *
    * @param string $entity_type
    */
-  public function getKeySchema($entity_type = NULL) {
+  static public function getKeySchema($entity_type = NULL) {
     // Done this way so that the Migrate UI doesn't blow
     // up trying to call getKeySchema without params.
     if (!$entity_type) {
