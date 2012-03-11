@@ -11,6 +11,7 @@ files[] = flag.inc
 files[] = geofield.inc
 files[] = interval.inc
 files[] = media.inc
+files[] = name.inc
 files[] = pathauto.inc
 files[] = profile2.inc
 files[] = rules.inc

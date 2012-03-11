@@ -20,6 +20,7 @@ Flag
 Geofield
 Interval
 Media
+Name Field
 Organic Groups
 Pathauto
 Phone Number (cck_phone)
