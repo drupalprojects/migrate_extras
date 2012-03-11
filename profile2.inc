@@ -123,7 +123,7 @@ class MigrateDestinationProfile2 extends MigrateDestinationEntity {
         }
       }
       else {
-        $entity->$this->entity_key = $row->migrate_map_destid1;
+        $entity->{$this->entity_key} = $row->migrate_map_destid1;
       }
     }
     if ($migration->getSystemOfRecord() == Migration::DESTINATION) {
