@@ -13,6 +13,7 @@ The extra implementation may be disabled at admin/content/migrate/configure.
 
 The following modules are currently supported in Migrate Extras on Drupal 6:
 
+Content Taxonomy
 Date
 Embedded Media Field
 Flag

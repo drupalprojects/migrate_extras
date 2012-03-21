@@ -81,11 +81,14 @@ class MigrateDestinationVotingapi extends MigrateDestination {
     $vote['timestamp'] = $entity->timestamp;
     $vote['vote_source'] = $entity->vote_source;
     votingapi_add_votes($vote);
-    $this->complete($entity, $row);
-
-    if ($entity->vote_id) {
+    if (isset($vote[0]['vote_id'])) {
+      $entity->vote_id = $vote[0]['vote_id'];
+      $this->complete($entity, $row);
       $this->importedIds[$entity->content_type][] = $entity->content_id;
       return array($entity->vote_id);
+    }
+    else {
+      return FALSE;
     }
   }
 
