@@ -78,23 +78,6 @@ class MigrateDestinationMedia extends MigrateDestinationFile {
  */
 class MigrateExtrasFileYoutube implements MigrateFileInterface {
   /**
-   * An option file object to use as a default starting point for building the
-   * file entity.
-   *
-   * @var stdClass
-   */
-  protected $defaultFile;
-
-  public function __construct($arguments = array(), $default_file = NULL) {
-    if ($default_file) {
-      $this->defaultFile = $default_file;
-    }
-    else {
-      $this->defaultFile = new stdClass;
-    }
-  }
-
-  /**
    * Implementation of MigrateFileInterface::fields().
    *
    * @return array
@@ -104,53 +87,7 @@ class MigrateExtrasFileYoutube implements MigrateFileInterface {
   }
 
   /**
-   * Setup a file entity object suitable for saving.
-   *
-   * @param $destination
-   *  Path to the Drupal copy of the file.
-   * @param $owner
-   *  Uid of the file owner.
-   * @return stdClass
-   *  A file object ready to be saved.
-   */
-  protected function createFileEntity($destination, $owner) {
-    // If we are replacing an existing file re-use its database record.
-    $existing_files = file_load_multiple(array(), array('uri' => $destination));
-    if (count($existing_files)) {
-      $file = reset($existing_files);
-    }
-    else {
-      $file = clone $this->defaultFile;
-      $file->uri = $destination;
-      $file->uid = $owner;
-      if (!isset($file->filename)) {
-        $file->filename = t('Video title');
-      }
-      if (!isset($file->filemime)) {
-        $file->filemime = 'video/youtube';
-      }
-      if (!isset($file->status)) {
-        $file->status = FILE_STATUS_PERMANENT;
-      }
-    }
-    return $file;
-  }
-
-  /**
-   * By whatever appropriate means, put the file in the right place.
-   *
-   * @param $destination
-   *  Destination path within Drupal.
-   * @return bool
-   *  TRUE if the file is successfully saved, FALSE otherwise.
-   */
-  protected function copyFile($destination) {
-    // No file to be copied in this case
-    return TRUE;
-  }
-
-  /**
-   * Default implementation of MigrateFileInterface::processFiles().
+   * Implementation of MigrateFileInterface::processFiles().
    *
    * @param $value
    *  The URI or local filespec of a file to be imported.

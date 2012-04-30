@@ -95,7 +95,7 @@ class MigrateExampleMediaVideoMigration extends XMLMigration {
     $xml_folder = drupal_get_path('module', 'migrate_extras_media');
     $items_url = $xml_folder . '/migrate_extras_media.xml';
     $item_xpath = '/source_data/item/video';
-    $item_ID_xpath = 'url';
+    $item_ID_xpath = 'uri';
     $items_class = new MigrateItemsXML($items_url, $item_xpath, $item_ID_xpath);
     $this->source = new MigrateSourceMultiItems($items_class, $fields);
 
