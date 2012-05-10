@@ -30,7 +30,7 @@ Voting API
 
 Compatibility
 -------------
-This release of Migrate Extras requires Migrate V2.1 or later.
+This release of Migrate Extras requires Migrate V2.4-beta1 or later.
 
 Maintainers
 -----------
