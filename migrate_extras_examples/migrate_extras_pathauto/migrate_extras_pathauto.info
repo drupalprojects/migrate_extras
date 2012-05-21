@@ -7,6 +7,6 @@ features[field][] = "node-migrate_example_pathauto-body"
 features[node][] = "migrate_example_pathauto"
 files[] = migrate_extras_pathauto.migrate.inc
 name = "Migrate Extras Pathauto Example"
-package = "Features"
+package = "Migrate Examples"
 project = "migrate_extras_pathauto_example"
 version = "7.x-2.1-beta1"

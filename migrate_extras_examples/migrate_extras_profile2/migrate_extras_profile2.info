@@ -4,4 +4,4 @@ dependencies[] = "profile2"
 description = "Examples of migrating into Profile2 entities"
 files[] = migrate_extras_profile2.migrate.inc
 name = "Migrate Extras Profile2 Example"
-package = "Development"
+package = "Migrate Examples"
