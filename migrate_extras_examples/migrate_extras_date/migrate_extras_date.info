@@ -19,6 +19,6 @@ features[content][] = "migrate_example_date-field_datetime_range"
 features[node][] = "migrate_example_date"
 files[] = migrate_extras_date.migrate.inc
 name = "Migrate Extras Date Example"
-package = "Features"
+package = "Migrate Examples"
 project = "migrate_extras_date"
 version = "6.x-2.1"
