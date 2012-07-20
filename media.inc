@@ -116,3 +116,33 @@ class MigrateExtrasFileYoutube implements MigrateFileInterface {
     }
   }
 }
+
+// Basic support for the deprecated media field type.
+class MigrateMediaFieldHandler extends MigrateFileFieldHandler {
+  public function __construct() {
+    $this->registerTypes(array('media'));
+  }
+  /**
+   * Implementation of MigrateFieldHandler::fields().
+   * Note that file and image fields support slightly different field lists.
+   *
+   * @param $type
+   *  The file field type - 'file' or 'image'
+   * @param $parent_field
+   *  Name of the parent field.
+   * @param Migration $migration
+   *  The migration context for the parent field. We can look at the mappings
+   *  and determine which subfields are relevant.
+   * @return array
+   */
+  public function fields($type, $parent_field, $migration = NULL) {
+    $fields = parent::fields($type, $parent_field, $migration);
+    unset($fields['description']);
+    unset($fields['display']);
+    $fields += array(
+      'title' => t('Subfield: String to be used as the title value'),
+      'data' => t('Subfield: Additional data about the field'),
+    );
+    return $fields;
+  }
+}
