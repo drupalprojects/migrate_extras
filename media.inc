@@ -134,19 +134,18 @@ class MigrateMediaFieldHandler extends MigrateFileFieldHandler {
   }
   /**
    * Implementation of MigrateFieldHandler::fields().
-   * Note that file and image fields support slightly different field lists.
    *
    * @param $type
-   *  The file field type - 'file' or 'image'
-   * @param $parent_field
-   *  Name of the parent field.
+   *  The field type.
+   * @param $instance
+   *  Instance info for the field.
    * @param Migration $migration
    *  The migration context for the parent field. We can look at the mappings
    *  and determine which subfields are relevant.
    * @return array
    */
-  public function fields($type, $parent_field, $migration = NULL) {
-    $fields = parent::fields($type, $parent_field, $migration);
+  public function fields($type, $instance, $migration = NULL) {
+    $fields = parent::fields($type, $instance, $migration);
     unset($fields['description']);
     unset($fields['display']);
     $fields += array(
