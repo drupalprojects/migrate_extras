@@ -99,9 +99,8 @@ class MigrateDestinationVotingapi extends MigrateDestination {
    * We're done with importing votes, recalculate the results.
    */
   function postImport() {
-    $this->importedIds = array_unique($this->importedIds);
-
     foreach ($this->importedIds as $entity_type => $entity_ids) {
+      $this->importedIds = array_unique($this->importedIds);
       foreach ($entity_ids as $entity_id) {
         votingapi_recalculate_results($entity_type, $entity_id, TRUE);
       }
