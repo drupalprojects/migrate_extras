@@ -22,6 +22,7 @@ Nodewords
 Organic Groups
 Page Title
 Pathauto
+Phone Number (cck_phone)
 Privatemsg
 Rules
 User Relationships
