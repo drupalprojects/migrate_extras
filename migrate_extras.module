@@ -20,6 +20,19 @@ function migrate_extras_init() {
 function migrate_extras_migrate_api() {
   $api = array(
     'api' => 2,
+    'destination handlers' => array(
+      'MigratePathautoHandler',
+      'MigrateNodewordsNodeHandler',
+      'MigratePageTitleNodeHandler',
+      'MigrateUuidHandler',
+      'MigrateUuidNodeHandler'
+    ),
+    'field handlers' => array(
+      'MigrateCckPhoneHandler',
+      'MigrateContentTaxonomyFieldHandler',
+      'MigrateDateFieldHandler',
+      'MigrateEmvideoHandler',
+    )
   );
   return $api;
 }
