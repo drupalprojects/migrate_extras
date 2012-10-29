@@ -180,7 +180,7 @@ class MigrateDestinationEntityAPI extends MigrateDestinationEntity {
         $entity->{$this->id} = $row->migrate_map_destid1;
       }
     }
-    else {
+    elseif ($migration->getSystemOfRecord() == Migration::SOURCE) {
       unset($entity->{$this->id});
     }
 
