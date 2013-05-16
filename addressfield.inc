@@ -22,19 +22,11 @@
  * Add the source field mappings to the argument array then add null mappings to
  * avoid having fields flagged as as unmapped:
  * @code
- *   $arguments = array(
- *     'thoroughfare' => array('source_field' => 'profile_address'),
- *     'locality' => array('source_field' => 'profile_city'),
- *     'administrative_area' => array('source_field' => 'profile_state'),
- *   );
  *   // The country should be passed in as the primary value.
- *   $this->addFieldMapping('field_user_address', 'profile_country')
- *        ->arguments($arguments);
- *   // Since the excerpt is mapped via an argument, add a null mapping so it's
- *   // not flagged as unmapped.
- *   $this->addFieldMapping(NULL, 'profile_address');
- *   $this->addFieldMapping(NULL, 'profile_city');
- *   $this->addFieldMapping(NULL, 'profile_state');
+ *   $this->addFieldMapping('field_address', 'profile_country');
+ *   $this->addFieldMapping('field_address:thoroughfare', 'profile_address');
+ *   $this->addFieldMapping('field_address:locality', 'profile_city');
+ *   $this->addFieldMapping('field_address:administrative_area', 'profile_state');
  * @endcode
  */
 class MigrateAddressFieldHandler extends MigrateFieldHandler {
@@ -48,24 +40,57 @@ class MigrateAddressFieldHandler extends MigrateFieldHandler {
   public function fields() {
     // Declare our arguments to also be available as subfields.
     $fields = array(
-      'administrative_area' => t('The administrative area of this address (i.e. State/Province)'),
-      'sub_administrative_area' => t('The sub administrative area of this address'),
-      'locality' => t('The locality of this address (i.e. City)'),
-      'dependent_locality' => t('The dependent locality of this address'),
-      'postal_code' => t('The postal code of this address'),
-      'thoroughfare' => t('The thoroughfare of this address (i.e. Street address)'),
-      'premise' => t('The premise of this address (i.e. Apartment / Suite number)'),
-      'sub_premise' => t('The sub_premise of this address'),
-      'organisation_name' => t('Contents of a primary OrganisationName element in the xNL XML'),
-      'name_line' => t('Contents of a primary NameLine element in the xNL XML'),
-      'first_name' => t('Contents of the FirstName element of a primary PersonName element in the xNL XML'),
-      'last_name' => t('Contents of the LastName element of a primary PersonName element in the xNL XML'),
-      'data' => t('Additional data for this address'),
+      'administrative_area' => t('<a href="@doc">The administrative area of ' .
+          'this address (i.e. State/Province)</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#administrative_area')),
+      'sub_administrative_area' => t('<a href="@doc">The sub administrative ' .
+          'area of this address</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#sub_administrative_area')),
+      'locality' => t('<a href="@doc">The locality of this address (i.e. ' .
+          'City)</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#locality')),
+      'dependent_locality' => t('<a href="@doc">The dependent locality of ' .
+          'this address</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#dependent_locality')),
+      'postal_code' => t('<a href="@doc">The postal code of this address</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#postal_code')),
+      'thoroughfare' => t('<a href="@doc">The thoroughfare of this address ' .
+          '(i.e. Street address)</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#thoroughfare')),
+      'premise' => t('<a href="@doc">The premise of this address (i.e. Apartment / Suite number)</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#premise')),
+      'sub_premise' => t('<a href="@doc">The sub_premise of this address</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#sub_premise')),
+      'organisation_name' => t('<a href="@doc">Contents of a primary ' .
+          'OrganisationName element in the xNL XML</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#organisation_name')),
+      'name_line' => t('<a href="@doc">Contents of a primary NameLine element ' .
+          'in the xNL XML</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#name_line')),
+      'first_name' => t('<a href="@doc">Contents of the FirstName element of ' .
+          'a primary PersonName element in the xNL XML</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#first_name')),
+      'last_name' => t('<a href="@doc">Contents of the LastName element of a ' .
+          'primary PersonName element in the xNL XML</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#last_name')),
+      'data' => t('<a href="@doc">Additional data for this address</a>',
+        array('@doc' => 'http://drupal.org/node/1996546#data')),
     );
     return $fields;
   }
 
-  public function prepare($entity, array $field_info, array $instance, array $values) {
+  /**
+   * Implements MigrateFieldHandler::prepare().
+   * 
+   * @param $entity
+   * @param array $field_info
+   * @param array $instance
+   * @param array $values
+   *
+   * @return null
+   */
+  public function prepare($entity, array $field_info, array $instance,
+                          array $values) {
     $arguments = array();
     if (isset($values['arguments'])) {
       $arguments = array_filter($values['arguments']);
@@ -76,7 +101,8 @@ class MigrateAddressFieldHandler extends MigrateFieldHandler {
     // Setup the standard Field API array for saving.
     $delta = 0;
     foreach ($values as $value) {
-      $return[$language][$delta] = array('country' => $value) + array_intersect_key($arguments, $field_info['columns']);
+      $return[$language][$delta] = array('country' => $value) +
+        array_intersect_key($arguments, $field_info['columns']);
       $delta++;
     }
 

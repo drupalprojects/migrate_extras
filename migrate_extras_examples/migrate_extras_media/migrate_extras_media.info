@@ -13,4 +13,4 @@ features[field][] = "node-migrate_extras_media_example-field_youtube_video"
 features[node][] = "migrate_extras_media_example"
 files[] = migrate_extras_media.migrate.inc
 name = "Migrate Extras Media"
-package = "Migrate Examples"
+package = "Migration"
