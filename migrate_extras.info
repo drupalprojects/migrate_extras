@@ -4,7 +4,6 @@ core = 7.x
 package="Migration"
 
 dependencies[] = migrate
-files[] = addressfield.inc
 files[] = cck_phone.inc
 files[] = entity_api.inc
 files[] = flag.inc
